@@ -166,13 +166,20 @@ Mantenha o bucket **privado**. O app serve os arquivos por download autenticado
 
 ### Criar o primeiro usuario
 
-No painel do servico, aba **Shell**:
+Pela propria aplicacao, em `https://<sua-url>/cadastrar`.
 
-```bash
-php artisan tinker
-```
+> A aba **Shell** do Render **nao existe no plano free** - e recurso de instancia
+> paga. Nada aqui depende dela. Se precisar rodar um comando artisan contra a
+> producao, rode do seu proprio terminal apontando para o Neon, que e acessivel
+> de qualquer lugar:
+>
+> ```bash
+> DB_CONNECTION=pgsql DB_URL='<string do Neon>' php artisan <comando>
+> ```
 
-E crie o advogado inicial conforme o `README.md`.
+Os dados de referencia (feriados, tipos de prazo, templates de checklist) ja sao
+semeados pelo `entrypoint` a cada deploy - os seeders usam `updateOrCreate`, entao
+repetir nao duplica nada. Para desligar, `RUN_SEED=false`.
 
 ---
 
@@ -193,6 +200,23 @@ O free do Render da 750 horas-instancia/mes; um unico servico sempre acordado
 consome ~730h, entao cabe - desde que seja **so este** servico na conta.
 
 ---
+
+## Depurando um erro 500 sem acesso a Shell
+
+Em producao `APP_DEBUG=false`, entao o 500 chega ao navegador sem explicacao, e o
+log as vezes mostra so `Cannot modify header information - headers already sent`,
+que e o erro secundario de quando a propria pagina de erro falha ao renderizar.
+
+Para ver a excecao real:
+
+1. **Environment** -> `APP_DEBUG` = `true` -> **Save** (o Render redeploya).
+2. Acesse a URL: a pagina passa a mostrar a excecao com arquivo e linha.
+3. **Volte `APP_DEBUG` para `false`** assim que identificar - com ele ligado
+   qualquer visitante ve stack trace, caminho de arquivo e trechos de config.
+
+Pelos logs tambem da: aba **Logs** (essa e gratuita), procure a **primeira** linha
+`production.ERROR:` do bloco - e ela que traz a mensagem original, nao o fim do
+stack trace.
 
 ## Limitacoes conhecidas deste arranjo
 

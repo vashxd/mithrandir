@@ -23,5 +23,13 @@ if [ "${RUN_MIGRATIONS:-true}" = "true" ]; then
     php artisan migrate --force --no-interaction         --database="${MIGRATION_CONNECTION:-pgsql_unpooled}"
 fi
 
+# Feriados, tipos de prazo e templates de checklist: sem esses dados de
+# referencia o calculo de prazo nao fecha. Os seeders usam updateOrCreate,
+# entao rodar a cada deploy e idempotente.
+if [ "${RUN_SEED:-true}" = "true" ]; then
+    echo "==> Semeando dados de referencia"
+    php artisan db:seed --force --no-interaction
+fi
+
 echo "==> Subindo nginx + php-fpm + fila + scheduler na porta ${PORT}"
 exec supervisord -c /etc/supervisord.conf
