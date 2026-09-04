@@ -53,23 +53,27 @@ services:
       - key: QUEUE_CONNECTION
         value: database
 
-      # ---- Cloudflare R2 (documentos) ----
+      # ---- Backblaze B2 (documentos), via API S3 ----
       - key: UPLOAD_DISK
         value: s3
       - key: FILESYSTEM_DISK
         value: s3
+      # keyID da application key do B2
       - key: AWS_ACCESS_KEY_ID
         sync: false
+      # applicationKey (aparece uma unica vez na criacao)
       - key: AWS_SECRET_ACCESS_KEY
         sync: false
       - key: AWS_BUCKET
         sync: false
+      # https://s3.<regiao>.backblazeb2.com - a regiao vem do painel do bucket
       - key: AWS_ENDPOINT
         sync: false
+      # No B2 a regiao e real (ex.: us-west-004), nao "auto" como no R2
       - key: AWS_DEFAULT_REGION
-        value: auto
+        sync: false
       - key: AWS_USE_PATH_STYLE_ENDPOINT
-        value: "true"
+        value: "false"
 
       # ---- Web push (gere com: php artisan mithrandir:vapid) ----
       - key: VAPID_PUBLIC_KEY

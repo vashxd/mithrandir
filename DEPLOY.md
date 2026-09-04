@@ -1,4 +1,4 @@
-# Deploy: Render + Neon + Cloudflare R2
+# Deploy: Render + Neon + Backblaze B2
 
 Stack de producao gratuita para o Mithrandir:
 
@@ -6,7 +6,7 @@ Stack de producao gratuita para o Mithrandir:
 |---|---|---|
 | Aplicacao (nginx + php-fpm + fila + scheduler) | Render | Free |
 | Banco Postgres | Neon | Free |
-| Documentos enviados | Cloudflare R2 | Free (10 GB) |
+| Documentos enviados | Backblaze B2 | Free (10 GB) |
 
 O container roda quatro processos sob supervisord: `nginx`, `php-fpm`,
 `queue:work` e `schedule:work`. Nao e preciso servico separado para fila.
@@ -69,26 +69,44 @@ Guarde a publica e a privada.
 
 ---
 
-## 2. Cloudflare R2 (documentos)
+## 2. Backblaze B2 (documentos)
 
 O disco do Render free e efemero: tudo que for gravado some no proximo deploy
 ou restart. Sem isto, os documentos anexados aos processos se perdem.
 
-1. Entre em <https://dash.cloudflare.com> -> **R2 Object Storage**.
-2. Ative o R2 (pede cartao para verificacao, mas o free de 10 GB nao cobra).
-3. **Create bucket**: nome `mithrandir-documentos`, location `Automatic`.
-4. Menu **R2** -> **API** -> **Manage API tokens** -> **Create API token**:
-   - *Permissions*: `Object Read & Write`
-   - *Specify bucket*: apenas `mithrandir-documentos`
-5. Anote os tres valores que aparecem:
-   - **Access Key ID** -> `AWS_ACCESS_KEY_ID`
-   - **Secret Access Key** -> `AWS_SECRET_ACCESS_KEY`
-   - **Endpoint** (`https://<account-id>.r2.cloudflarestorage.com`) -> `AWS_ENDPOINT`
+Usamos o B2 e nao o Cloudflare R2 porque o R2 exige cartao para liberar a conta,
+mesmo dentro da cota gratuita. O B2 da 10 GB permanentes sem cartao e expoe uma
+API S3 completa - do lado do Laravel e o mesmo disco `s3`, so muda o endpoint.
+
+1. Crie a conta em <https://www.backblaze.com/sign-up/cloud-storage>.
+2. No painel, **B2 Cloud Storage** -> **Buckets** -> **Create a Bucket**:
+   - *Bucket Name*: `mithrandir-documentos` (o nome e global; se estiver em uso,
+     acrescente um sufixo e ajuste `AWS_BUCKET`)
+   - *Files in Bucket are*: **Private**
+   - *Default Encryption*: habilitado
+3. Criado o bucket, a lista mostra o **Endpoint**, algo como
+   `s3.us-west-004.backblazeb2.com`. Anote os dois pedacos:
+   - `AWS_ENDPOINT` = `https://s3.us-west-004.backblazeb2.com`
+   - `AWS_DEFAULT_REGION` = `us-west-004`
+
+   > A regiao precisa ser a real do bucket. Diferente do R2, o B2 nao aceita
+   > `auto` - assinatura V4 com regiao errada devolve `SignatureDoesNotMatch`.
+
+4. **Application Keys** -> **Add a New Application Key**:
+   - *Name*: `mithrandir-render`
+   - *Allow access to Bucket*: apenas `mithrandir-documentos`
+   - *Type of Access*: **Read and Write**
+5. Anote o que aparece (o `applicationKey` so e exibido uma vez):
+   - **keyID** -> `AWS_ACCESS_KEY_ID`
+   - **applicationKey** -> `AWS_SECRET_ACCESS_KEY`
 
 Mantenha o bucket **privado**. O app serve os arquivos por download autenticado
 (`DocumentoController@download`), nunca por URL publica.
 
----
+> **Alternativa se o B2 nao servir:** Supabase Storage, tambem S3-compativel e
+> sem cartao, mas so 1 GB e o projeto free hiberna apos 7 dias sem uso - o que
+> deixaria os documentos indisponiveis. Para arquivo de escritorio, o B2 e a
+> escolha melhor.
 
 ## 3. Render (aplicacao)
 
@@ -107,10 +125,11 @@ Mantenha o bucket **privado**. O app serve os arquivos por download autenticado
    | `APP_URL` | `https://mithrandir.onrender.com` (ajuste ao nome final) |
    | `DB_URL` | connection string do Neon **com** `-pooler` |
    | `DB_MIGRATION_URL` | a mesma string **sem** `-pooler` |
-   | `AWS_ACCESS_KEY_ID` | Access Key ID do R2 |
-   | `AWS_SECRET_ACCESS_KEY` | Secret Access Key do R2 |
+   | `AWS_ACCESS_KEY_ID` | keyID do B2 |
+   | `AWS_SECRET_ACCESS_KEY` | applicationKey do B2 |
    | `AWS_BUCKET` | `mithrandir-documentos` |
-   | `AWS_ENDPOINT` | `https://<account-id>.r2.cloudflarestorage.com` |
+   | `AWS_ENDPOINT` | `https://s3.<regiao>.backblazeb2.com` |
+   | `AWS_DEFAULT_REGION` | a regiao do bucket, ex.: `us-west-004` |
    | `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` | do passo 0 |
    | `VAPID_SUBJECT` | `mailto:seu@email.com` |
 
