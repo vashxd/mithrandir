@@ -40,10 +40,10 @@ class ProcessoController extends Controller
                 $numero = NumeroCnj::limpar($busca);
 
                 $q->where(function ($sub) use ($busca, $numero) {
-                    $sub->where('titulo', 'like', "%{$busca}%")
-                        ->orWhere('assunto', 'like', "%{$busca}%")
-                        ->orWhere('numero_cnj', 'like', '%'.($numero ?: $busca).'%')
-                        ->orWhereHas('cliente', fn ($c) => $c->where('nome', 'like', "%{$busca}%"));
+                    $sub->where('titulo', op_like(), "%{$busca}%")
+                        ->orWhere('assunto', op_like(), "%{$busca}%")
+                        ->orWhere('numero_cnj', op_like(), '%'.($numero ?: $busca).'%')
+                        ->orWhereHas('cliente', fn ($c) => $c->where('nome', op_like(), "%{$busca}%"));
                 });
             })
             ->orderByDesc('updated_at')
@@ -88,7 +88,7 @@ class ProcessoController extends Controller
 
             Publicacao::doAdvogado(contexto()->advogadoId())
                 ->whereNull('processo_id')
-                ->whereRaw('REPLACE(REPLACE(REPLACE(numero_processo, ".", ""), "-", ""), "/", "") = ?', [$limpo])
+                ->whereRaw("REPLACE(REPLACE(REPLACE(numero_processo, '.', ''), '-', ''), '/', '') = ?", [$limpo])
                 ->update(['processo_id' => $processo->id]);
         }
 

@@ -31,8 +31,8 @@ class ClienteController extends Controller
             ->visivel()
             ->when(! $request->boolean('arquivados'), fn ($q) => $q->whereNull('arquivado_em'))
             ->when($busca, fn ($q) => $q->where(function ($sub) use ($busca) {
-                $sub->where('nome', 'like', "%{$busca}%")
-                    ->orWhere('documento', 'like', '%'.preg_replace('/\D/', '', $busca).'%');
+                $sub->where('nome', op_like(), "%{$busca}%")
+                    ->orWhere('documento', op_like(), '%'.preg_replace('/\D/', '', $busca).'%');
             }))
             ->orderBy('nome')
             ->paginate(30)
