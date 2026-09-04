@@ -218,6 +218,39 @@ Pelos logs tambem da: aba **Logs** (essa e gratuita), procure a **primeira** lin
 `production.ERROR:` do bloco - e ela que traz a mensagem original, nao o fim do
 stack trace.
 
+## BLOQUEIO DO DJEN A PARTIR DE IP ESTRANGEIRO
+
+O plano free do Render nao tem regiao no Brasil (Oregon, Ohio, Virginia,
+Frankfurt, Singapura). A API de comunicacoes do CNJ responde **403** para
+requisicoes vindas de fora do pais.
+
+Medido em 2026-09-04, mesma URL, mesmos parametros, mesmo User-Agent:
+
+| Origem | Resposta |
+|---|---|
+| Conexao domestica no Brasil | `200` - 6 publicacoes da OAB 21100/AM |
+| Render, regiao Oregon | `403` |
+
+O User-Agent nao influencia: com e sem o UA do app, do Brasil os dois dao 200.
+
+**Consequencia.** O DJEN e o gatilho formal de contagem de prazo (secao 7.1). Com
+ele bloqueado, o resto da aplicacao funciona mas a funcao central nao: nenhuma
+publicacao entra, nenhum prazo e criado automaticamente. Nao adianta mexer no
+codigo - nada aqui e corrigivel do lado do cliente.
+
+**Saida.** Hospedar em maquina com IP brasileiro. A Oracle Cloud Always Free tem
+regiao `sa-saopaulo-1` e VM gratuita permanente; o `Dockerfile` deste repositorio
+roda la sem alteracao, e Neon e B2 continuam como estao.
+
+> Antes de migrar tudo, teste o IP de la primeiro - o 403 prova bloqueio a IP
+> estrangeiro, mas nao garante que um IP de datacenter brasileiro passe, caso a
+> regra do CNJ tambem barre faixas de nuvem:
+>
+> ```bash
+> curl -s -o /dev/null -w '%{http_code}
+' >   'https://comunicaapi.pje.jus.br/api/v1/comunicacao?numeroOab=21100&ufOab=AM&dataDisponibilizacaoInicio=2026-09-01&dataDisponibilizacaoFim=2026-09-04'
+> ```
+
 ## Limitacoes conhecidas deste arranjo
 
 - **Cold start**: se o ping falhar, a primeira requisicao demora ~50s.
