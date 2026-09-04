@@ -40,6 +40,7 @@ RUN install-php-extensions \
 
 COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 COPY docker/php.ini /usr/local/etc/php/conf.d/zz-app.ini
+COPY docker/php-fpm-pool.conf /usr/local/etc/php-fpm.d/zz-app.conf
 COPY docker/nginx.conf /etc/nginx/nginx.conf.template
 COPY docker/supervisord.conf /etc/supervisord.conf
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint

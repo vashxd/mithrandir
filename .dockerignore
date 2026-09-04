@@ -8,6 +8,8 @@ storage/logs/*
 storage/framework/cache/*
 storage/framework/sessions/*
 storage/framework/views/*
+# caches gerados no Windows carregam caminhos que nao existem no container
+bootstrap/cache/*.php
 database/database.sqlite
 cloudflared.exe
 .env
