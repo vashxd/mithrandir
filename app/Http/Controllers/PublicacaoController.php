@@ -14,6 +14,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
 use Throwable;
@@ -174,8 +175,17 @@ class PublicacaoController extends Controller
             try {
                 $resultado = $ingestao->sincronizar($watch);
                 $novas += $resultado['novas'];
-            } catch (Throwable) {
+            } catch (Throwable $e) {
                 $falhas++;
+
+                // Sem isto a falha vira so "confira o diario manualmente" na
+                // tela: fora do DJEN indisponivel de fato, a causa costuma ser
+                // rede ou bloqueio do lado do servidor, e nada disso aparece.
+                Log::warning('Varredura manual do DJEN falhou', [
+                    'oab_watch_id' => $watch->id,
+                    'excecao' => $e::class,
+                    'erro' => $e->getMessage(),
+                ]);
             }
         }
 
