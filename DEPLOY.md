@@ -84,6 +84,7 @@ API S3 completa - do lado do Laravel e o mesmo disco `s3`, so muda o endpoint.
      acrescente um sufixo e ajuste `AWS_BUCKET`)
    - *Files in Bucket are*: **Private**
    - *Default Encryption*: habilitado
+   - *Object Lifecycle*: **Keep only the last version**
 3. Criado o bucket, a lista mostra o **Endpoint**, algo como
    `s3.us-west-004.backblazeb2.com`. Anote os dois pedacos:
    - `AWS_ENDPOINT` = `https://s3.us-west-004.backblazeb2.com`
@@ -92,10 +93,19 @@ API S3 completa - do lado do Laravel e o mesmo disco `s3`, so muda o endpoint.
    > A regiao precisa ser a real do bucket. Diferente do R2, o B2 nao aceita
    > `auto` - assinatura V4 com regiao errada devolve `SignatureDoesNotMatch`.
 
+   > O padrao do B2 e *Keep all versions*: cada documento substituido ou
+   > excluido pelo app deixa a versao antiga ocupando espaco, e a cota de 10 GB
+   > se esgota com arquivo que voce acha que apagou.
+
 4. **Application Keys** -> **Add a New Application Key**:
    - *Name*: `mithrandir-render`
    - *Allow access to Bucket*: apenas `mithrandir-documentos`
    - *Type of Access*: **Read and Write**
+
+   > Nao use a **Master Application Key**. Ela carrega `deleteBuckets`,
+   > `writeKeys` e `listAllBucketNames` - manda na conta inteira. Essa chave vai
+   > viver numa variavel de ambiente de um app exposto na internet; restrita ao
+   > bucket, um vazamento atinge so os documentos, nao a conta.
 5. Anote o que aparece (o `applicationKey` so e exibido uma vez):
    - **keyID** -> `AWS_ACCESS_KEY_ID`
    - **applicationKey** -> `AWS_SECRET_ACCESS_KEY`
