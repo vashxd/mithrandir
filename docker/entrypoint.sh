@@ -1,6 +1,14 @@
 #!/bin/sh
 set -e
 
+# Comando avulso (docker compose run --rm app php artisan ...): executa e sai,
+# sem migrar, semear nem subir os servicos. E o unico jeito de rodar
+# key:generate numa instalacao nova, ja que a validacao de APP_KEY abaixo
+# impediria o container de subir sem a chave que se quer justamente gerar.
+if [ "$#" -gt 0 ]; then
+    exec "$@"
+fi
+
 : "${PORT:=10000}"
 export PORT
 

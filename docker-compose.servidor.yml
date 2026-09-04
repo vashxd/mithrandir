@@ -1,0 +1,76 @@
+# Deploy em servidor proprio (maquina em casa, com dominio).
+#
+# Diferente do arranjo em nuvem, aqui o Postgres e os documentos ficam na
+# propria maquina: ha disco de verdade e nao ha cota externa a respeitar.
+#
+# A exposicao para a internet e escolhida por profile:
+#
+#   docker compose -f docker-compose.servidor.yml --profile tunel up -d
+#   docker compose -f docker-compose.servidor.yml --profile caddy up -d
+#
+# "tunel" nao precisa abrir porta no roteador e funciona atras de CGNAT.
+# "caddy" exige as portas 80 e 443 encaminhadas e IP publico de verdade.
+
+services:
+  app:
+    build: .
+    image: mithrandir:local
+    restart: unless-stopped
+    env_file: .env.servidor
+    environment:
+      PORT: 8080
+    expose:
+      - "8080"
+    volumes:
+      # Disco 'local' do Laravel: e onde DocumentoController grava os anexos.
+      # Sem este volume, todo documento some no proximo "up --build".
+      - documentos:/var/www/html/storage/app/private
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    env_file: .env.servidor
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      # O entrypoint do app migra assim que sobe; sem esperar o banco ficar
+      # pronto, o primeiro start falha.
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  # --- Opcao 1: tunel da Cloudflare (recomendada em casa) ---
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    profiles: ["tunel"]
+    command: tunnel --no-autoupdate run
+    env_file: .env.servidor
+    depends_on:
+      - app
+
+  # --- Opcao 2: exposicao direta com TLS proprio ---
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    profiles: ["caddy"]
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    env_file: .env.servidor
+    depends_on:
+      - app
+
+volumes:
+  pgdata:
+  documentos:
+  caddy_data:
+  caddy_config:
