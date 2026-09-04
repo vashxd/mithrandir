@@ -31,6 +31,17 @@ php artisan mithrandir:vapid
 
 Guarde a publica e a privada.
 
+> **No Windows** o comando falha com "OpenSSL nao consegue gerar chave de curva
+> eliptica" enquanto `OPENSSL_CONF` estiver vazia. Aponte para o arquivo que vem
+> com o PHP e rode de novo - sem isso o proprio envio de push tambem falha em
+> dev, nao so a geracao:
+>
+> ```bash
+> OPENSSL_CONF="C:/Program Files/PHP/current/extras/ssl/openssl.cnf" >   php artisan mithrandir:vapid
+> ```
+>
+> No container Alpine do deploy isso nao ocorre.
+
 ---
 
 ## 1. Neon (banco Postgres)
