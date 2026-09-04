@@ -35,7 +35,11 @@ services:
       # ---- Neon (Postgres) ----
       - key: DB_CONNECTION
         value: pgsql
+      # Endpoint POOLED (host com -pooler): usado pelo app em runtime.
       - key: DB_URL
+        sync: false
+      # Endpoint DIRETO (host sem -pooler): usado so pelas migrations.
+      - key: DB_MIGRATION_URL
         sync: false
       - key: DB_SSLMODE
         value: require

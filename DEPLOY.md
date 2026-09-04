@@ -40,19 +40,32 @@ Guarde a publica e a privada.
    - *Name*: `mithrandir`
    - *Postgres version*: 17
    - *Region*: `AWS South America (São Paulo)` - menor latencia para o escritorio.
-3. Criado o projeto, o Neon mostra a caixa **Connection string**. Escolha o
-   dropdown `Parameters only` -> nao; deixe em **Connection string** mesmo e
-   marque a opcao **Pooled connection**.
-4. Copie a string inteira. Ela tem este formato:
+3. Criado o projeto, o Neon mostra a caixa **Connection string**. Voce precisa
+   de **duas** variantes da mesma string, alternando o toggle *Connection pooling*:
 
+   | Toggle | Host | Vai em |
+   |---|---|---|
+   | Ligado | `ep-algo-pooler.sa-east-1...` | `DB_URL` |
+   | Desligado | `ep-algo.sa-east-1...` | `DB_MIGRATION_URL` |
+
+   A diferenca no host e so o sufixo `-pooler`; usuario e senha sao os mesmos.
+   Guarde as duas - a senha so aparece uma vez.
+
+> **Por que duas.** O app em runtime usa a pooled: o free do Neon tem poucas
+> conexoes diretas e web + fila + scheduler abrem varias. Mas o pooler e o
+> PgBouncer em transaction mode, e ele **nao propaga o erro de DDL dentro de
+> transacao**: o `CREATE TABLE` da migration retorna sucesso para o PDO enquanto
+> a transacao ja abortou no servidor, e a migration morre com
+> `SQLSTATE[25P02] current transaction is aborted`. Por isso `php artisan
+> migrate` roda pela conexao `pgsql_unpooled`, que aponta para o endpoint direto.
+> Isso ja esta ligado no `entrypoint` - voce so precisa fornecer as duas URLs.
+
+4. Rode as migrations agora, do seu proprio terminal, para validar o schema
+   antes de envolver o Render:
+
+   ```bash
+   DB_CONNECTION=pgsql DB_URL='<string SEM -pooler>'      php artisan migrate --force
    ```
-   postgresql://usuario:senha@ep-algo-pooler.sa-east-1.aws.neon.tech/neondb?sslmode=require
-   ```
-
-   Esse valor e o `DB_URL` do passo 3. Guarde - a senha so aparece uma vez.
-
-> Use sempre a **pooled connection** (o host tem `-pooler`). O plano free do
-> Neon tem poucas conexoes diretas, e o worker da fila mais o web abrem varias.
 
 ---
 
@@ -92,7 +105,8 @@ Mantenha o bucket **privado**. O app serve os arquivos por download autenticado
    |---|---|
    | `APP_KEY` | a chave `base64:...` do passo 0 |
    | `APP_URL` | `https://mithrandir.onrender.com` (ajuste ao nome final) |
-   | `DB_URL` | a connection string pooled do Neon |
+   | `DB_URL` | connection string do Neon **com** `-pooler` |
+   | `DB_MIGRATION_URL` | a mesma string **sem** `-pooler` |
    | `AWS_ACCESS_KEY_ID` | Access Key ID do R2 |
    | `AWS_SECRET_ACCESS_KEY` | Secret Access Key do R2 |
    | `AWS_BUCKET` | `mithrandir-documentos` |

@@ -16,9 +16,11 @@ php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 
+# Migrations vao pelo endpoint direto do Neon: o pooled (PgBouncer) engole o
+# erro do DDL transacional e a migration falha com "transaction is aborted".
 if [ "${RUN_MIGRATIONS:-true}" = "true" ]; then
-    echo "==> Rodando migrations"
-    php artisan migrate --force --no-interaction
+    echo "==> Rodando migrations (conexao ${MIGRATION_CONNECTION:-pgsql_unpooled})"
+    php artisan migrate --force --no-interaction         --database="${MIGRATION_CONNECTION:-pgsql_unpooled}"
 fi
 
 echo "==> Subindo nginx + php-fpm + fila + scheduler na porta ${PORT}"
