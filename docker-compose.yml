@@ -1,0 +1,37 @@
+# Deploy em VM (Oracle Cloud Always Free, regiao de Sao Paulo).
+#
+# O Caddy termina o TLS e faz proxy para o container da aplicacao, que
+# continua servindo nginx + php-fpm + fila + scheduler internamente na 8080.
+# Certificado Let's Encrypt e emitido e renovado sozinho pelo Caddy.
+
+services:
+  app:
+    build: .
+    image: mithrandir:local
+    restart: unless-stopped
+    env_file: .env.producao
+    environment:
+      PORT: 8080
+    expose:
+      - "8080"
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    # Mesmo arquivo do app: o Caddy le APP_DOMINIO do proprio ambiente para
+    # emitir o certificado. Interpolar ${APP_DOMINIO} aqui nao funcionaria - o
+    # compose so interpola a partir de .env, nunca de um env_file.
+    env_file: .env.producao
+    depends_on:
+      - app
+
+volumes:
+  caddy_data:
+  caddy_config:

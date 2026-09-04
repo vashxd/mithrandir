@@ -1,0 +1,15 @@
+{$APP_DOMINIO} {
+	encode zstd gzip
+
+	# O app confia em proxy (trustProxies '*' em bootstrap/app.php), entao o
+	# esquema e o IP real chegam corretos por estes cabecalhos.
+	reverse_proxy app:8080 {
+		header_up X-Forwarded-Proto {scheme}
+		header_up X-Real-IP {remote_host}
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}

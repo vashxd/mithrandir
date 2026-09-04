@@ -23,3 +23,6 @@ yarn-error.log
 /.vscode
 /.zed
 /database/database.sqlite
+
+# Arquivo de producao da VM, com segredos
+.env.producao
