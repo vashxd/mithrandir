@@ -1,0 +1,109 @@
+@import 'tailwindcss';
+
+@theme {
+    --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+    /* Criticidade (RF-3.3). Fatal <= 3 dias uteis e vermelho, sem negociacao. */
+    --color-critico: oklch(0.58 0.21 27);
+    --color-atencao: oklch(0.75 0.16 75);
+    --color-normal: oklch(0.62 0.13 240);
+    --color-ok: oklch(0.65 0.15 155);
+}
+
+@layer base {
+    html {
+        -webkit-tap-highlight-color: transparent;
+        -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+        /* O app e usado em pe, no corredor do forum. */
+        overscroll-behavior-y: none;
+    }
+
+    /* Area de toque minima de 44px (secao 11). */
+    button,
+    a[role='button'],
+    [type='button'],
+    [type='submit'] {
+        min-height: 44px;
+    }
+
+    input,
+    select,
+    textarea {
+        min-height: 44px;
+        /* 16px evita o zoom automatico do Safari no foco. */
+        font-size: 16px;
+    }
+}
+
+/*
+ * No Tailwind 4 uma classe so pode ser usada em @apply se for declarada como
+ * @utility. Por isso `btn` mora aqui, e nao em @layer components.
+ */
+@utility btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: --spacing(2);
+    border-radius: var(--radius-xl);
+    padding-inline: --spacing(4);
+    padding-block: --spacing(2.5);
+    font-size: var(--text-sm);
+    line-height: var(--tw-leading, var(--text-sm--line-height));
+    font-weight: var(--font-weight-semibold);
+    transition-property: color, background-color, border-color, opacity, transform;
+    transition-duration: 150ms;
+
+    &:active {
+        transform: scale(0.98);
+    }
+
+    &:disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
+    }
+}
+
+@layer components {
+    .campo {
+        @apply w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-slate-900
+               shadow-sm outline-none transition
+               focus:border-sky-500 focus:ring-2 focus:ring-sky-200
+               disabled:bg-slate-100 disabled:text-slate-500;
+    }
+
+    .rotulo {
+        @apply mb-1.5 block text-sm font-medium text-slate-700;
+    }
+
+    .btn-primario {
+        @apply btn bg-slate-900 text-white hover:bg-slate-800;
+    }
+
+    .btn-secundario {
+        @apply btn border border-slate-300 bg-white text-slate-700 hover:bg-slate-50;
+    }
+
+    .btn-perigo {
+        @apply btn bg-red-600 text-white hover:bg-red-700;
+    }
+
+    .cartao {
+        @apply rounded-2xl border border-slate-200 bg-white shadow-sm;
+    }
+
+    .etiqueta {
+        @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium;
+    }
+}
+
+/* Respeita a safe area do iPhone com a bottom bar. */
+.pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.pt-safe {
+    padding-top: env(safe-area-inset-top, 0px);
+}

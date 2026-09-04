@@ -1,0 +1,28 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class ChecklistItem extends Model
+{
+    protected $table = 'checklists';
+
+    protected $guarded = ['id'];
+
+    protected function casts(): array
+    {
+        return ['obrigatorio' => 'boolean'];
+    }
+
+    public function processo(): BelongsTo
+    {
+        return $this->belongsTo(Processo::class);
+    }
+
+    public function documento(): BelongsTo
+    {
+        return $this->belongsTo(Documento::class);
+    }
+}
