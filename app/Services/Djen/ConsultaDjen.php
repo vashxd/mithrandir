@@ -20,6 +20,27 @@ final class ConsultaDjen
     public const CAMINHO = '/api/v1/comunicacao';
 
     /**
+     * Consulta que so quer saber QUANTAS publicacoes um nome traria.
+     *
+     * `itensPorPagina=1` porque o que interessa e o `count` do envelope, nao
+     * os itens: e conselho de tela antes de ligar a vigilancia de um cliente.
+     *
+     * @return array<string, string>
+     */
+    public static function contagemPorNomeParte(string $nome, int $dias = 30): array
+    {
+        $hoje = CarbonImmutable::now(config('mithrandir.timezone'))->startOfDay();
+
+        return [
+            'nomeParte' => $nome,
+            'dataDisponibilizacaoInicio' => $hoje->subDays($dias)->toDateString(),
+            'dataDisponibilizacaoFim' => $hoje->toDateString(),
+            'pagina' => '1',
+            'itensPorPagina' => '1',
+        ];
+    }
+
+    /**
      * @return array<string, string>
      */
     public static function paraWatch(OabWatch $watch, CarbonImmutable $inicio, CarbonImmutable $fim): array

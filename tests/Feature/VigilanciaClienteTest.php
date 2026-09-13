@@ -322,4 +322,70 @@ class VigilanciaClienteTest extends TestCase
 
         $this->assertSame(0, OabWatch::where('tipo', 'cliente')->count());
     }
+
+    /**
+     * O 403 a IP estrangeiro nao pode virar 503 na tela: o servidor devolve a
+     * consulta para o navegador fazer, que e o caminho que ainda funciona.
+     */
+    public function test_previa_delega_ao_navegador_quando_o_djen_recusa_o_servidor(): void
+    {
+        Http::fake(['comunicaapi.pje.jus.br/*' => Http::response('', 403)]);
+
+        $this->actingAs($this->advogado)
+            ->getJson("/clientes/{$this->cliente->id}/vigilancia/previa")
+            ->assertOk()
+            ->assertJsonPath('delegar', true)
+            ->assertJsonPath('parametros.nomeParte', $this->cliente->nome)
+            ->assertJsonPath('parametros.itensPorPagina', '1');
+    }
+
+    public function test_previa_delegada_volta_a_503_com_a_varredura_pelo_cliente_desligada(): void
+    {
+        config(['mithrandir.djen.varredura_cliente' => false]);
+
+        Http::fake(['comunicaapi.pje.jus.br/*' => Http::response('', 403)]);
+
+        $this->actingAs($this->advogado)
+            ->getJson("/clientes/{$this->cliente->id}/vigilancia/previa")
+            ->assertStatus(503);
+    }
+
+    /**
+     * O numero vem do navegador; o julgamento continua no servidor.
+     */
+    public function test_contagem_do_navegador_e_interpretada_pelo_servidor(): void
+    {
+        Http::fake();
+
+        $this->actingAs($this->advogado)
+            ->postJson("/clientes/{$this->cliente->id}/vigilancia/previa", ['quantidade' => 7])
+            ->assertOk()
+            ->assertJsonPath('quantidade', 7)
+            ->assertJsonPath('recomendado', true);
+
+        $acima = (int) config('mithrandir.djen.teto_por_varredura', 300) + 1;
+
+        $this->actingAs($this->advogado)
+            ->postJson("/clientes/{$this->cliente->id}/vigilancia/previa", ['quantidade' => $acima])
+            ->assertOk()
+            ->assertJsonPath('recomendado', false);
+
+        Http::assertNothingSent();
+    }
+
+    public function test_previa_de_cliente_alheio_e_recusada(): void
+    {
+        $estranho = User::create([
+            'name' => 'Bruno Lima',
+            'email' => 'bruno@exemplo.test',
+            'password' => 'segredo123',
+            'oab' => '99999',
+            'uf' => 'AM',
+            'aceite_termo_em' => now(),
+        ]);
+
+        $this->actingAs($estranho)
+            ->postJson("/clientes/{$this->cliente->id}/vigilancia/previa", ['quantidade' => 1])
+            ->assertForbidden();
+    }
 }

@@ -5,6 +5,7 @@ import { dataCurta, dataHora, hoje, iniciais } from '../../formato';
 import Cabecalho from '../../Components/Cabecalho.vue';
 import Folha from '../../Components/Folha.vue';
 import Icone from '../../Components/Icone.vue';
+import { previaVigilancia } from '../../varreduraCliente';
 
 const props = defineProps({
     cliente: { type: Object, required: true },
@@ -74,10 +75,7 @@ async function abrirVigilancia() {
     carregandoPrevia.value = true;
 
     try {
-        const resposta = await fetch(`/clientes/${props.cliente.id}/vigilancia/previa`, {
-            headers: { Accept: 'application/json' },
-        });
-        previa.value = await resposta.json();
+        previa.value = await previaVigilancia(props.cliente.id);
     } catch {
         previa.value = { erro: 'Nao deu para consultar o DJEN agora.' };
     } finally {
@@ -96,22 +94,32 @@ function alternarVigilancia() {
 
 const folhaAtendimento = ref(false);
 
+/**
+ * O campo se chama `dia` aqui e vira `data` no envio.
+ *
+ * `data` e metodo do useForm (`form.data()`): um campo com esse nome nao
+ * chega a existir - o metodo vence, e o input de data fica preso numa funcao
+ * em vez do valor. O servidor continua esperando `data`, entao a troca
+ * acontece so na saida.
+ */
 const atendimento = useForm({
-    data: hoje(),
+    dia: hoje(),
     canal: 'whatsapp',
     resumo: '',
     processo_id: null,
 });
 
 function salvarAtendimento() {
-    atendimento.post(`/clientes/${props.cliente.id}/atendimentos`, {
-        preserveScroll: true,
-        onSuccess: () => {
-            folhaAtendimento.value = false;
-            atendimento.reset();
-            atendimento.data = hoje();
-        },
-    });
+    atendimento
+        .transform(({ dia, ...resto }) => ({ ...resto, data: dia }))
+        .post(`/clientes/${props.cliente.id}/atendimentos`, {
+            preserveScroll: true,
+            onSuccess: () => {
+                folhaAtendimento.value = false;
+                atendimento.reset();
+                atendimento.dia = hoje();
+            },
+        });
 }
 
 /* ---------------- Status para o WhatsApp (RF-5.3) ---------------- */
@@ -350,7 +358,7 @@ const ROTULO_CANAL = {
             <div class="grid grid-cols-2 gap-3">
                 <div>
                     <label class="rotulo" for="data">Data</label>
-                    <input id="data" v-model="atendimento.data" type="date" class="campo">
+                    <input id="data" v-model="atendimento.dia" type="date" class="campo">
                 </div>
                 <div>
                     <label class="rotulo" for="canal">Canal</label>

@@ -8,6 +8,7 @@ use App\Models\OabWatch;
 use App\Models\Prazo;
 use App\Models\Processo;
 use App\Models\Publicacao;
+use App\Services\Djen\ConsultaDjen;
 use App\Services\Djen\DjenClient;
 use App\Services\Djen\DjenIndisponivelException;
 use App\Support\Documento;
@@ -273,15 +274,55 @@ class ClienteController extends Controller
     {
         $this->autorizar($cliente);
 
-        $teto = (int) config('mithrandir.djen.teto_por_varredura', 300);
+        $dias = 30;
 
         try {
-            $quantidade = $djen->contarPorNomeParte($cliente->nome, 30);
+            return response()->json($this->lerPrevia($cliente, $djen->contarPorNomeParte($cliente->nome, $dias)));
         } catch (DjenIndisponivelException $e) {
-            return response()->json(['erro' => $e->getMessage()], 503);
-        }
+            // 403 a IP estrangeiro cai aqui. Em vez de 503, devolvemos a
+            // consulta para o navegador fazer - ele esta no Brasil. Mesma
+            // divisao da varredura: o servidor diz o que perguntar, o cliente
+            // so transporta, e a interpretacao volta para ca em `contar`.
+            if (! config('mithrandir.djen.varredura_cliente')) {
+                return response()->json(['erro' => $e->getMessage()], 503);
+            }
 
-        return response()->json([
+            return response()->json([
+                'delegar' => true,
+                'url' => $djen->baseUrl().ConsultaDjen::CAMINHO,
+                'parametros' => ConsultaDjen::contagemPorNomeParte($cliente->nome, $dias),
+            ]);
+        }
+    }
+
+    /**
+     * A contagem que o navegador obteve, interpretada aqui.
+     *
+     * O numero vem do cliente, mas o julgamento nao: teto e texto ficam no
+     * servidor para nao existirem em duas versoes. Nada disso persiste - e
+     * conselho de tela antes de ligar a vigilancia.
+     */
+    public function contarPrevia(Request $request, Cliente $cliente): JsonResponse
+    {
+        $this->autorizar($cliente);
+
+        abort_unless((bool) config('mithrandir.djen.varredura_cliente'), 404);
+
+        $dados = $request->validate([
+            'quantidade' => ['required', 'integer', 'min:0', 'max:1000000'],
+        ]);
+
+        return response()->json($this->lerPrevia($cliente, (int) $dados['quantidade']));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function lerPrevia(Cliente $cliente, int $quantidade): array
+    {
+        $teto = (int) config('mithrandir.djen.teto_por_varredura', 300);
+
+        return [
             'nome' => $cliente->nome,
             'quantidade' => $quantidade,
             'teto' => $teto,
@@ -301,7 +342,7 @@ class ClienteController extends Controller
                     $quantidade
                 ),
             },
-        ]);
+        ];
     }
 
     /**

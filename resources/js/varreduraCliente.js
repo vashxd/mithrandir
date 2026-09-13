@@ -219,3 +219,38 @@ export async function sincronizarAgora() {
 
     return resultado;
 }
+
+/**
+ * Prévia de vigilância de um cliente, com o mesmo desvio da varredura.
+ *
+ * O servidor tenta contar sozinho; se o DJEN recusar o IP dele, devolve a
+ * consulta para este navegador fazer e recebe de volta só o número. O texto e
+ * o teto continuam saindo do servidor — julgamento não deve existir em duas
+ * versões.
+ */
+export async function previaVigilancia(clienteId) {
+    const resposta = await fetch(`/clientes/${clienteId}/vigilancia/previa`, {
+        headers: { Accept: 'application/json' },
+    });
+
+    const previa = await resposta.json();
+
+    if (!resposta.ok || !previa?.delegar) {
+        return previa;
+    }
+
+    const corpo = await buscarPagina(previa.url, previa.parametros, 1, 1);
+    const quantidade = Number(corpo?.count ?? 0);
+
+    const interpretada = await fetch(`/clientes/${clienteId}/vigilancia/previa`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+            'X-CSRF-TOKEN': csrf(),
+        },
+        body: JSON.stringify({ quantidade }),
+    });
+
+    return interpretada.json();
+}

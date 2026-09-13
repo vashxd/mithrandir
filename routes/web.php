@@ -103,6 +103,9 @@ Route::middleware(['auth', 'termo.aceito'])->group(function () {
     Route::get('/clientes/{cliente}/vigilancia/previa', [ClienteController::class, 'previaVigilancia'])
         ->middleware('throttle:20,10')
         ->name('clientes.vigilancia.previa');
+    Route::post('/clientes/{cliente}/vigilancia/previa', [ClienteController::class, 'contarPrevia'])
+        ->middleware('throttle:20,10')
+        ->name('clientes.vigilancia.previa.contar');
     Route::post('/clientes/{cliente}/vigilancia', [ClienteController::class, 'alternarVigilancia'])
         ->name('clientes.vigilancia');
 
