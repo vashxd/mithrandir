@@ -268,6 +268,21 @@ falha do servidor.
 > a aplicacao rodar fora do Brasil, essa faixa e a unica coisa separando
 > "nenhuma publicacao nova" de "ninguem foi olhar".
 
+> **Armadilha do nginx.** O lote da varredura e o unico POST grande que esta
+> aplicacao faz (~3 KB por publicacao; 7 publicacoes ja passam de 20 KB). Acima
+> de `client_body_buffer_size` o nginx grava o corpo em arquivo temporario, e o
+> pacote do Alpine cria `/var/lib/nginx` como root enquanto os workers rodam
+> como `www-data`. O sintoma e um **500 com 145 bytes de HTML que nunca chega ao
+> PHP** - nao ha `production.ERROR` correspondente, so um `[crit]` do nginx:
+>
+> ```
+> open() "/var/lib/nginx/tmp/client_body/0000000001" failed (13: Permission denied)
+> ```
+>
+> Corrigido no `Dockerfile` (chown de `/var/lib/nginx`) e no `docker/nginx.conf`
+> (`client_body_buffer_size 1M`). Se voce trocar a imagem base ou o usuario do
+> nginx, confira os dois.
+
 Para desligar (ex.: ja migrou para o Brasil e quer so o servidor varrendo):
 
 ```
