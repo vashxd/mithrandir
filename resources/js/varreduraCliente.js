@@ -106,6 +106,14 @@ async function entregar(corpo) {
         body: JSON.stringify(corpo),
     });
 
+    // Recusa explicada (422): o servidor ja gravou a falha no historico do
+    // radar. Devolver o corpo em vez de estourar evita registrar a mesma
+    // falha duas vezes, e preserva a mensagem real em lugar de
+    // "o servidor recusou o lote".
+    if (resposta.status === 422) {
+        return resposta.json().catch(() => ({ falhou: true, novas: 0 }));
+    }
+
     if (!resposta.ok) {
         throw new Error(`O servidor recusou o lote (${resposta.status}).`);
     }
@@ -144,6 +152,10 @@ async function executar(forcar) {
 
             const resultado = await entregar({ ...janela, itens });
             novas += resultado?.novas ?? 0;
+
+            if (resultado?.falhou) {
+                falhas += 1;
+            }
         } catch (erro) {
             falhas += 1;
 

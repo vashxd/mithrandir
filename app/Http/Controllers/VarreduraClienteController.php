@@ -9,6 +9,8 @@ use App\Services\Djen\IngestaoService;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 /**
  * Varredura do DJEN executada pelo navegador do advogado.
@@ -126,7 +128,27 @@ class VarreduraClienteController extends Controller
             return response()->json(['novas' => 0, 'total' => 0, 'falhou' => true]);
         }
 
-        $resultado = $this->ingestao->ingerirDoCliente($watch, $dados['itens'] ?? [], $inicio, $fim);
+        try {
+            $resultado = $this->ingestao->ingerirDoCliente($watch, $dados['itens'] ?? [], $inicio, $fim);
+        } catch (Throwable $e) {
+            // A ingestao propaga (o job e a sincronizacao manual contam com
+            // isso). Aqui do outro lado esta um navegador: deixar subir vira
+            // 500 com pagina HTML, que o cliente nao sabe ler e o advogado
+            // nao sabe diagnosticar. O SyncLog da falha ja foi gravado dentro
+            // da ingestao, entao a mensagem aparece no historico do Radar.
+            Log::error('Ingestao da varredura pelo navegador falhou', [
+                'oab_watch_id' => $watch->id,
+                'excecao' => $e::class,
+                'erro' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'novas' => 0,
+                'total' => 0,
+                'falhou' => true,
+                'erro' => $e->getMessage(),
+            ], 422);
+        }
 
         return response()->json($resultado + ['falhou' => false]);
     }

@@ -182,6 +182,40 @@ class VarreduraClienteTest extends TestCase
         $this->assertSame(2, SyncLog::where('status', 'falha')->where('origem', 'cliente')->count());
     }
 
+    /**
+     * Ingestao que falha nao pode virar 500 com pagina HTML: do outro lado
+     * esta um navegador, e o advogado precisa da mensagem real.
+     */
+    public function test_falha_na_ingestao_volta_como_json_e_nao_como_500(): void
+    {
+        $advogado = $this->advogado();
+        $watch = $this->watch($advogado);
+
+        // Volume acima do teto e a falha de ingestao mais facil de provocar.
+        config(['mithrandir.djen.teto_por_varredura' => 1]);
+
+        $resposta = $this->actingAs($advogado)
+            ->postJson('/publicacoes/varredura', $this->janela($watch) + [
+                'watch_id' => $watch->id,
+                'itens' => [
+                    $this->item(['id' => 1, 'hash' => 'um']),
+                    $this->item(['id' => 2, 'hash' => 'dois']),
+                ],
+            ]);
+
+        $resposta->assertStatus(422)
+            ->assertJsonPath('falhou', true)
+            ->assertJsonPath('novas', 0);
+
+        $this->assertStringContainsString('teto', $resposta->json('erro'));
+
+        // A mensagem tem de estar no historico do radar, nao so na resposta.
+        $log = SyncLog::where('oab_watch_id', $watch->id)->latest('id')->first();
+        $this->assertSame('falha', $log->status);
+        $this->assertSame('cliente', $log->origem);
+        $this->assertStringContainsString('teto', $log->erro);
+    }
+
     public function test_nao_se_varre_termo_de_outro_advogado(): void
     {
         $dono = $this->advogado();
