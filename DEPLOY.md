@@ -238,9 +238,41 @@ ele bloqueado, o resto da aplicacao funciona mas a funcao central nao: nenhuma
 publicacao entra, nenhum prazo e criado automaticamente. Nao adianta mexer no
 codigo - nada aqui e corrigivel do lado do cliente.
 
-**Saida.** Hospedar em maquina com IP brasileiro. A Oracle Cloud Always Free tem
-regiao `sa-saopaulo-1` e VM gratuita permanente; o `Dockerfile` deste repositorio
-roda la sem alteracao, e Neon e B2 continuam como estao.
+**Saida 1 (a boa): hospedar em maquina com IP brasileiro.** A Oracle Cloud
+Always Free tem regiao `sa-saopaulo-1` e VM gratuita permanente; o `Dockerfile`
+deste repositorio roda la sem alteracao, e Neon e B2 continuam como estao. Passo
+a passo em `ORACLE.md`.
+
+**Saida 2 (a paliativa): varredura pelo navegador.** A API do CNJ libera CORS
+para qualquer origem (`Access-Control-Allow-Origin: *`, preflight aceitando GET,
+verificado em 2026-09-13). Como o advogado esta no Brasil, o navegador dele
+alcanca o que o servidor nao alcanca. O app faz isso sozinho: em toda abertura
+de tela, e no botao "sincronizar agora".
+
+| Peca | Onde |
+|---|---|
+| Decide o que buscar (termos, janela) | servidor, `VarreduraClienteController@plano` |
+| Faz a requisicao ao DJEN | navegador, `resources/js/varreduraCliente.js` |
+| Valida, deduplica e persiste | servidor, `IngestaoService::ingerirDoCliente` |
+
+O navegador nunca escolhe a janela nem interpreta campo: manda payload cru e o
+servidor recusa lote cuja janela seja menor que a exigida. Falha do cliente vira
+`SyncLog` com `origem = cliente` e alimenta o "radar cego" do RF-1.10, igual a
+falha do servidor.
+
+> **Isto NAO substitui o scheduler.** A varredura pelo navegador so acontece se
+> alguem abrir o app. A janela de 7 dias (`DJEN_JANELA_DIAS`) protege contra
+> *perder* a publicacao, nao contra *descobri-la tarde* - e para contagem de
+> prazo, atraso e o dano. Por isso o shell mostra, em qualquer tela, ha quantas
+> horas o radar nao e varrido: 30h acende aviso amarelo, 72h vermelho. Enquanto
+> a aplicacao rodar fora do Brasil, essa faixa e a unica coisa separando
+> "nenhuma publicacao nova" de "ninguem foi olhar".
+
+Para desligar (ex.: ja migrou para o Brasil e quer so o servidor varrendo):
+
+```
+DJEN_VARREDURA_CLIENTE=false
+```
 
 > Antes de migrar tudo, teste o IP de la primeiro - o 403 prova bloqueio a IP
 > estrangeiro, mas nao garante que um IP de datacenter brasileiro passe, caso a

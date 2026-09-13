@@ -55,10 +55,10 @@ function salvarDespesa() {
 }
 
 const CORES_SITUACAO = {
-    pago: 'bg-emerald-100 text-emerald-800',
-    vencido: 'bg-red-100 text-red-800',
-    vencendo: 'bg-amber-100 text-amber-800',
-    a_vencer: 'bg-slate-100 text-slate-600',
+    pago: 'bg-ok-fundo text-ok-tinta',
+    vencido: 'bg-perigo-fundo text-perigo-tinta',
+    vencendo: 'bg-atencao-fundo text-atencao-tinta',
+    a_vencer: 'bg-superficie-2 text-tinta-2',
 };
 </script>
 
@@ -69,7 +69,7 @@ const CORES_SITUACAO = {
         <template #acoes>
             <button
                 type="button"
-                class="flex h-11 w-11 items-center justify-center rounded-full bg-slate-900 text-white"
+                class="flex h-11 w-11 items-center justify-center rounded-full bg-acao text-sobre-acao"
                 aria-label="Nova despesa"
                 @click="folhaDespesa = true"
             >
@@ -82,16 +82,16 @@ const CORES_SITUACAO = {
         <div class="flex items-center justify-between py-3 lg:justify-start lg:gap-2">
             <button
                 type="button"
-                class="flex h-11 w-11 items-center justify-center rounded-full text-slate-600 active:bg-slate-200"
+                class="flex h-11 w-11 items-center justify-center rounded-full text-tinta-2 active:bg-superficie-3"
                 aria-label="Mês anterior"
                 @click="mudarMes(-1)"
             >
                 <Icone nome="voltar" class="h-5 w-5" />
             </button>
-            <p class="text-sm font-semibold text-slate-700 first-letter:uppercase lg:order-first lg:mr-2 lg:text-base">{{ rotuloMes() }}</p>
+            <p class="text-sm font-semibold text-tinta-2 first-letter:uppercase lg:order-first lg:mr-2 lg:text-base">{{ rotuloMes() }}</p>
             <button
                 type="button"
-                class="flex h-11 w-11 items-center justify-center rounded-full text-slate-600 active:bg-slate-200"
+                class="flex h-11 w-11 items-center justify-center rounded-full text-tinta-2 active:bg-superficie-3"
                 aria-label="Próximo mês"
                 @click="mudarMes(1)"
             >
@@ -101,62 +101,62 @@ const CORES_SITUACAO = {
 
         <!-- RF-7.3: os quatro números que importam. -->
         <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
-            <div class="cartao p-4" :class="painel.vencido_qtd ? 'ring-1 ring-red-200' : ''">
-                <p class="text-xs font-medium text-slate-500">Vencido</p>
-                <p class="mt-1 text-xl font-bold" :class="painel.vencido_qtd ? 'text-red-700' : 'text-slate-900'">
+            <div class="cartao p-4" :class="painel.vencido_qtd ? 'ring-1 ring-perigo-borda' : ''">
+                <p class="text-xs font-medium text-tinta-3">Vencido</p>
+                <p class="mt-1 text-xl font-bold" :class="painel.vencido_qtd ? 'text-perigo' : 'text-tinta'">
                     {{ moeda(painel.vencido) }}
                 </p>
-                <p class="text-xs text-slate-500">
+                <p class="text-xs text-tinta-3">
                     {{ painel.vencido_qtd }} {{ painel.vencido_qtd === 1 ? 'parcela' : 'parcelas' }}
                 </p>
             </div>
 
             <div class="cartao p-4">
-                <p class="text-xs font-medium text-slate-500">A receber no mês</p>
-                <p class="mt-1 text-xl font-bold text-slate-900">{{ moeda(painel.a_receber_mes) }}</p>
+                <p class="text-xs font-medium text-tinta-3">A receber no mês</p>
+                <p class="mt-1 text-xl font-bold text-tinta">{{ moeda(painel.a_receber_mes) }}</p>
             </div>
 
             <div class="cartao p-4">
-                <p class="text-xs font-medium text-slate-500">Recebido no mês</p>
-                <p class="mt-1 text-xl font-bold text-emerald-700">{{ moeda(painel.recebido_mes) }}</p>
+                <p class="text-xs font-medium text-tinta-3">Recebido no mês</p>
+                <p class="mt-1 text-xl font-bold text-ok">{{ moeda(painel.recebido_mes) }}</p>
             </div>
 
             <div class="cartao p-4">
-                <p class="text-xs font-medium text-slate-500">Total contratado</p>
-                <p class="mt-1 text-xl font-bold text-slate-900">{{ moeda(painel.total_contratado) }}</p>
+                <p class="text-xs font-medium text-tinta-3">Total contratado</p>
+                <p class="mt-1 text-xl font-bold text-tinta">{{ moeda(painel.total_contratado) }}</p>
             </div>
         </div>
 
         <!-- RF-7.5: provisão de imposto sugerida sobre o que entrou. -->
         <div v-if="painel.recebido_mes > 0" class="cartao mt-2 flex items-center justify-between gap-3 p-4">
             <div class="min-w-0">
-                <p class="text-sm font-medium text-slate-800">Guardar para imposto</p>
-                <p class="text-xs leading-relaxed text-slate-500">
+                <p class="text-sm font-medium text-tinta">Guardar para imposto</p>
+                <p class="text-xs leading-relaxed text-tinta-3">
                     {{ painel.percentual_imposto }}% do que entrou este mês. Sugestão, não cálculo fiscal.
                 </p>
             </div>
-            <p class="shrink-0 text-lg font-bold text-slate-900">{{ moeda(painel.provisao_imposto) }}</p>
+            <p class="shrink-0 text-lg font-bold text-tinta">{{ moeda(painel.provisao_imposto) }}</p>
         </div>
 
         <section v-if="vencidas.length" class="mt-5">
-            <h2 class="mb-2 secao-titulo text-red-700">Vencidas</h2>
-            <ul class="cartao divide-y divide-slate-100 ring-1 ring-red-200">
+            <h2 class="mb-2 secao-titulo text-perigo">Vencidas</h2>
+            <ul class="cartao divide-y divide-borda-sutil ring-1 ring-perigo-borda">
                 <li v-for="parcela in vencidas" :key="parcela.id" class="flex items-center gap-3 p-3.5">
                     <span class="min-w-0 flex-1">
-                        <span class="block truncate text-sm font-medium text-slate-900">
+                        <span class="block truncate text-sm font-medium text-tinta">
                             {{ parcela.cliente ?? 'Sem cliente' }}
                         </span>
-                        <span class="block truncate text-xs text-slate-500">
+                        <span class="block truncate text-xs text-tinta-3">
                             {{ parcela.numero }}ª parcela · venceu {{ dataCurta(parcela.vencimento) }}
                         </span>
                     </span>
-                    <span class="shrink-0 font-semibold text-slate-900">{{ moeda(parcela.valor) }}</span>
+                    <span class="shrink-0 font-semibold text-tinta">{{ moeda(parcela.valor) }}</span>
                     <Link
                         :href="`/financeiro/parcelas/${parcela.id}/baixar`"
                         method="post"
                         as="button"
                         type="button"
-                        class="shrink-0 rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white"
+                        class="shrink-0 rounded-lg bg-acao px-3 py-2 text-xs font-semibold text-sobre-acao"
                         preserve-scroll
                     >
                         baixar
@@ -168,27 +168,27 @@ const CORES_SITUACAO = {
         <section class="mt-5">
             <h2 class="mb-2 secao-titulo">Parcelas do mês</h2>
 
-            <p v-if="!parcelas_mes.length" class="cartao p-5 text-center text-sm text-slate-500">
+            <p v-if="!parcelas_mes.length" class="cartao p-5 text-center text-sm text-tinta-3">
                 Nenhuma parcela com vencimento neste mês.
             </p>
 
-            <ul v-else class="cartao divide-y divide-slate-100">
+            <ul v-else class="cartao divide-y divide-borda-sutil">
                 <li v-for="parcela in parcelas_mes" :key="parcela.id" class="flex items-center gap-3 p-3.5">
-                    <span class="w-12 shrink-0 font-mono text-xs text-slate-500">
+                    <span class="w-12 shrink-0 font-mono text-xs text-tinta-3">
                         {{ dataCurta(parcela.vencimento).slice(0, 5) }}
                     </span>
 
                     <span class="min-w-0 flex-1">
-                        <span class="block truncate text-sm font-medium text-slate-900">
+                        <span class="block truncate text-sm font-medium text-tinta">
                             {{ parcela.cliente ?? 'Sem cliente' }}
                         </span>
-                        <span v-if="parcela.processo" class="block truncate text-xs text-slate-500">
+                        <span v-if="parcela.processo" class="block truncate text-xs text-tinta-3">
                             {{ parcela.processo }}
                         </span>
                     </span>
 
                     <span class="shrink-0 text-right">
-                        <span class="block font-semibold text-slate-900">{{ moeda(parcela.valor) }}</span>
+                        <span class="block font-semibold text-tinta">{{ moeda(parcela.valor) }}</span>
                         <span class="etiqueta" :class="CORES_SITUACAO[parcela.situacao]">
                             {{ parcela.situacao === 'a_vencer' ? 'a vencer' : parcela.situacao }}
                         </span>
@@ -200,7 +200,7 @@ const CORES_SITUACAO = {
                         method="post"
                         as="button"
                         type="button"
-                        class="shrink-0 rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white"
+                        class="shrink-0 rounded-lg bg-acao px-3 py-2 text-xs font-semibold text-sobre-acao"
                         preserve-scroll
                     >
                         baixar
@@ -212,7 +212,7 @@ const CORES_SITUACAO = {
                         as="button"
                         type="button"
                         :data="{ estornar: true }"
-                        class="shrink-0 rounded-lg px-2 py-2 text-xs font-medium text-slate-400"
+                        class="shrink-0 rounded-lg px-2 py-2 text-xs font-medium text-tinta-3"
                         preserve-scroll
                     >
                         estornar
@@ -224,27 +224,27 @@ const CORES_SITUACAO = {
         <section class="mt-5">
             <div class="mb-2 flex items-baseline justify-between">
                 <h2 class="secao-titulo">Despesas do mês</h2>
-                <span class="text-sm font-semibold text-slate-700">{{ moeda(painel.despesas_mes) }}</span>
+                <span class="text-sm font-semibold text-tinta-2">{{ moeda(painel.despesas_mes) }}</span>
             </div>
 
-            <p v-if="!despesas.length" class="cartao p-5 text-center text-sm text-slate-500">
+            <p v-if="!despesas.length" class="cartao p-5 text-center text-sm text-tinta-3">
                 Nenhuma despesa lançada.
             </p>
 
-            <ul v-else class="cartao divide-y divide-slate-100">
+            <ul v-else class="cartao divide-y divide-borda-sutil">
                 <li v-for="item in despesas" :key="item.id" class="flex items-center gap-3 p-3.5">
-                    <span class="w-12 shrink-0 font-mono text-xs text-slate-500">
+                    <span class="w-12 shrink-0 font-mono text-xs text-tinta-3">
                         {{ dataCurta(item.data).slice(0, 5) }}
                     </span>
                     <span class="min-w-0 flex-1">
-                        <span class="block truncate text-sm text-slate-800">{{ item.descricao }}</span>
-                        <span class="block truncate text-xs text-slate-500">
+                        <span class="block truncate text-sm text-tinta">{{ item.descricao }}</span>
+                        <span class="block truncate text-xs text-tinta-3">
                             {{ [item.categoria, item.processo].filter(Boolean).join(' · ') }}
                         </span>
                     </span>
                     <span class="shrink-0 text-right">
-                        <span class="block font-medium text-slate-900">{{ moeda(item.valor) }}</span>
-                        <span v-if="item.reembolsavel" class="block text-xs text-slate-500">
+                        <span class="block font-medium text-tinta">{{ moeda(item.valor) }}</span>
+                        <span v-if="item.reembolsavel" class="block text-xs text-tinta-3">
                             {{ item.reembolsada ? 'reembolsada' : 'reembolsável' }}
                         </span>
                     </span>
@@ -258,7 +258,7 @@ const CORES_SITUACAO = {
             <div>
                 <label class="rotulo" for="descricao">Descrição</label>
                 <input id="descricao" v-model="despesa.descricao" type="text" class="campo" placeholder="Custas iniciais">
-                <p v-if="despesa.errors.descricao" class="mt-1 text-sm text-red-600">{{ despesa.errors.descricao }}</p>
+                <p v-if="despesa.errors.descricao" class="mt-1 text-sm text-perigo">{{ despesa.errors.descricao }}</p>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
@@ -294,9 +294,9 @@ const CORES_SITUACAO = {
                 </select>
             </div>
 
-            <label class="flex items-center gap-2.5 rounded-2xl bg-white p-4 ring-1 ring-slate-200">
-                <input v-model="despesa.reembolsavel" type="checkbox" class="h-5 w-5 rounded border-slate-300">
-                <span class="text-sm text-slate-800">Cobrar do cliente depois</span>
+            <label class="flex items-center gap-2.5 rounded-2xl bg-superficie p-4 ring-1 ring-borda">
+                <input v-model="despesa.reembolsavel" type="checkbox" class="h-5 w-5 rounded border-borda-forte">
+                <span class="text-sm text-tinta">Cobrar do cliente depois</span>
             </label>
         </div>
 

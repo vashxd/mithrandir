@@ -1,9 +1,13 @@
 <script setup>
 import { computed, ref } from 'vue';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
-import { dataCurta, dataLonga, contagem, CORES_CRITICIDADE, BARRA_CRITICIDADE, ROTULO_STATUS_PRAZO } from '../../formato';
+import {
+    dataCurta, dataLonga, contagem, ROTULO_STATUS_PRAZO,
+    CORES_CRITICIDADE, BARRA_CRITICIDADE, ICONE_CRITICIDADE,
+} from '../../formato';
 import Cabecalho from '../../Components/Cabecalho.vue';
 import CadeiaOrigem from '../../Components/CadeiaOrigem.vue';
+import Icone from '../../Components/Icone.vue';
 import Folha from '../../Components/Folha.vue';
 
 const props = defineProps({
@@ -78,10 +82,13 @@ function enviarAjuste() {
                 <p class="text-xs font-semibold uppercase tracking-wide opacity-70">Data fatal</p>
                 <p class="mt-1 font-mono text-3xl font-bold">{{ dataCurta(prazo.data_fatal) }}</p>
                 <p class="mt-0.5 text-sm opacity-80 first-letter:uppercase">{{ dataLonga(prazo.data_fatal) }}</p>
-                <p class="mt-2 text-sm font-semibold">{{ contagem(prazo.dias_restantes) }}</p>
+                <p class="mt-2 flex items-center justify-center gap-1.5 text-sm font-semibold">
+                    <Icone :nome="ICONE_CRITICIDADE[prazo.criticidade]" class="h-4 w-4 shrink-0" />
+                    {{ contagem(prazo.dias_restantes) }}
+                </p>
 
                 <div class="mt-4 border-t border-current/10 pt-3">
-                    <p class="text-xs font-medium opacity-70">Data-alvo interna (com folga de {{ prazo.buffer_dias }} dias)</p>
+                    <p class="text-xs font-medium opacity-70">Data-alvo interna (com folga de {{ prazo.buffer_dias }} dias úteis)</p>
                     <p class="font-mono text-lg font-semibold">{{ dataCurta(prazo.data_alvo) }}</p>
                 </div>
             </div>
@@ -90,16 +97,16 @@ function enviarAjuste() {
         <!-- Conferência pendente: o prazo NÃO fechou, e isso precisa ficar claro. -->
         <div
             v-if="prazo.aguardando_conferencia"
-            class="rounded-2xl border border-violet-200 bg-violet-50 p-4"
+            class="rounded-2xl border border-info-borda bg-info-fundo p-4"
         >
-            <p class="text-sm font-semibold text-violet-900">
+            <p class="text-sm font-semibold text-info-tinta">
                 Aguardando conferência
                 <template v-if="prazo.conferencia_por"> — {{ prazo.conferencia_por }} marcou como feito</template>
             </p>
-            <p v-if="prazo.conferencia_observacao" class="mt-1 text-sm leading-relaxed text-violet-900">
+            <p v-if="prazo.conferencia_observacao" class="mt-1 text-sm leading-relaxed text-info-tinta">
                 “{{ prazo.conferencia_observacao }}”
             </p>
-            <p class="mt-2 text-xs leading-relaxed text-violet-800">
+            <p class="mt-2 text-xs leading-relaxed text-info-tinta">
                 O prazo continua <strong>aberto</strong> até você confirmar. Quem responde por
                 ele perante a OAB é você.
             </p>
@@ -124,40 +131,40 @@ function enviarAjuste() {
 
         <div
             v-if="prazo.precisa_revisao"
-            class="rounded-2xl border border-amber-200 bg-amber-50 p-4"
+            class="rounded-2xl border border-atencao-borda bg-atencao-fundo p-4"
         >
-            <p class="text-sm font-semibold text-amber-900">Este prazo precisa da sua revisão</p>
-            <p class="mt-1 text-sm leading-relaxed text-amber-800">{{ prazo.revisao_motivo }}</p>
+            <p class="text-sm font-semibold text-atencao-tinta">Este prazo precisa da sua revisão</p>
+            <p class="mt-1 text-sm leading-relaxed text-atencao-tinta">{{ prazo.revisao_motivo }}</p>
         </div>
 
         <div class="cartao p-4">
             <dl class="grid grid-cols-2 gap-3 text-sm">
                 <div>
-                    <dt class="text-xs font-medium text-slate-500">Status</dt>
-                    <dd class="font-semibold text-slate-900">{{ ROTULO_STATUS_PRAZO[prazo.status] }}</dd>
+                    <dt class="text-xs font-medium text-tinta-3">Status</dt>
+                    <dd class="font-semibold text-tinta">{{ ROTULO_STATUS_PRAZO[prazo.status] }}</dd>
                 </div>
                 <div>
-                    <dt class="text-xs font-medium text-slate-500">Contagem</dt>
-                    <dd class="text-slate-800">
+                    <dt class="text-xs font-medium text-tinta-3">Contagem</dt>
+                    <dd class="text-tinta">
                         {{ prazo.dias }} dias {{ prazo.em_dias_uteis ? 'úteis' : 'corridos' }}
-                        <span v-if="prazo.multiplicador > 1" class="font-semibold text-slate-900">× {{ prazo.multiplicador }}</span>
+                        <span v-if="prazo.multiplicador > 1" class="font-semibold text-tinta">× {{ prazo.multiplicador }}</span>
                     </dd>
                 </div>
                 <div v-if="prazo.multiplicador_motivo" class="col-span-2">
-                    <dt class="text-xs font-medium text-slate-500">Motivo do prazo em dobro</dt>
-                    <dd class="text-slate-800">{{ prazo.multiplicador_motivo }}</dd>
+                    <dt class="text-xs font-medium text-tinta-3">Motivo do prazo em dobro</dt>
+                    <dd class="text-tinta">{{ prazo.multiplicador_motivo }}</dd>
                 </div>
                 <div v-if="prazo.processo" class="col-span-2">
-                    <dt class="text-xs font-medium text-slate-500">Caso</dt>
+                    <dt class="text-xs font-medium text-tinta-3">Caso</dt>
                     <dd>
-                        <Link :href="`/casos/${prazo.processo.id}`" class="font-medium text-sky-700">
+                        <Link :href="`/casos/${prazo.processo.id}`" class="font-medium text-acento">
                             {{ prazo.processo.rotulo }}
                         </Link>
-                        <span v-if="prazo.processo.cliente" class="text-slate-500"> · {{ prazo.processo.cliente }}</span>
+                        <span v-if="prazo.processo.cliente" class="text-tinta-3"> · {{ prazo.processo.cliente }}</span>
                     </dd>
                 </div>
                 <div class="col-span-2">
-                    <dt class="text-xs font-medium text-slate-500">Responsável</dt>
+                    <dt class="text-xs font-medium text-tinta-3">Responsável</dt>
                     <dd>
                         <select
                             class="campo mt-1"
@@ -173,8 +180,8 @@ function enviarAjuste() {
                 </div>
 
                 <div v-if="prazo.observacoes" class="col-span-2">
-                    <dt class="text-xs font-medium text-slate-500">Observações</dt>
-                    <dd class="whitespace-pre-wrap text-slate-800">{{ prazo.observacoes }}</dd>
+                    <dt class="text-xs font-medium text-tinta-3">Observações</dt>
+                    <dd class="whitespace-pre-wrap text-tinta">{{ prazo.observacoes }}</dd>
                 </div>
             </dl>
         </div>
@@ -184,8 +191,8 @@ function enviarAjuste() {
 
         <div v-if="prazo.publicacao" class="cartao p-4">
             <h2 class="mb-2 secao-titulo">Publicação de origem</h2>
-            <p class="line-clamp-4 text-sm leading-relaxed text-slate-700">{{ prazo.publicacao.teor }}</p>
-            <Link :href="`/publicacoes/${prazo.publicacao.id}`" class="mt-2 inline-block text-sm font-medium text-sky-700">
+            <p class="line-clamp-4 text-sm leading-relaxed text-tinta-2">{{ prazo.publicacao.teor }}</p>
+            <Link :href="`/publicacoes/${prazo.publicacao.id}`" class="mt-2 inline-block text-sm font-medium text-acento">
                 ver publicação completa
             </Link>
         </div>
@@ -235,10 +242,10 @@ function enviarAjuste() {
             </button>
 
             <div v-if="podeFechar && ['aberto', 'em_andamento'].includes(prazo.status)" class="flex gap-2">
-                <button type="button" class="btn-secundario flex-1 text-slate-500" @click="mudarStatus('prejudicado')">
+                <button type="button" class="btn-secundario flex-1 text-tinta-3" @click="mudarStatus('prejudicado')">
                     Ficou prejudicado
                 </button>
-                <button type="button" class="btn-secundario flex-1 text-red-600" @click="mudarStatus('perdido')">
+                <button type="button" class="btn-secundario flex-1 text-perigo" @click="mudarStatus('perdido')">
                     Perdi o prazo
                 </button>
             </div>
@@ -247,7 +254,7 @@ function enviarAjuste() {
 
     <Folha :aberta="folhaConferencia" titulo="Enviar para conferência" @fechar="folhaConferencia = false">
         <div class="space-y-4">
-            <p class="rounded-2xl bg-violet-50 p-4 text-sm leading-relaxed text-violet-900 ring-1 ring-violet-200">
+            <p class="rounded-2xl bg-info-fundo p-4 text-sm leading-relaxed text-info-tinta ring-1 ring-info-borda">
                 Isto <strong>não fecha o prazo</strong>. Ele continua aberto e vermelho até
                 {{ prazo.processo ? 'o titular' : 'o advogado responsável' }} conferir e confirmar —
                 é quem responde por ele perante a OAB.
@@ -279,12 +286,12 @@ function enviarAjuste() {
 
     <Folha :aberta="folhaAjuste" titulo="Ajustar a data fatal" @fechar="folhaAjuste = false">
         <div class="space-y-4">
-            <div class="rounded-2xl bg-slate-100 p-4">
-                <p class="text-xs font-medium text-slate-500">Data calculada pelo app</p>
-                <p class="font-mono text-lg font-semibold text-slate-900">
+            <div class="rounded-2xl bg-superficie-2 p-4">
+                <p class="text-xs font-medium text-tinta-3">Data calculada pelo app</p>
+                <p class="font-mono text-lg font-semibold text-tinta">
                     {{ dataCurta(prazo.data_fatal_calculada ?? prazo.data_fatal) }}
                 </p>
-                <p class="mt-2 text-xs leading-relaxed text-slate-600">
+                <p class="mt-2 text-xs leading-relaxed text-tinta-2">
                     O valor calculado nunca é apagado. Ele fica registrado ao lado do seu ajuste,
                     junto com a justificativa e a data da alteração.
                 </p>
@@ -293,7 +300,7 @@ function enviarAjuste() {
             <div>
                 <label class="rotulo" for="nova-data">Nova data fatal</label>
                 <input id="nova-data" v-model="ajuste.data_fatal" type="date" class="campo">
-                <p v-if="ajuste.errors.data_fatal" class="mt-1 text-sm text-red-600">{{ ajuste.errors.data_fatal }}</p>
+                <p v-if="ajuste.errors.data_fatal" class="mt-1 text-sm text-perigo">{{ ajuste.errors.data_fatal }}</p>
             </div>
 
             <div>
@@ -305,10 +312,10 @@ function enviarAjuste() {
                     class="campo"
                     placeholder="Ex.: houve intimação pessoal em cartório no dia 12/03, que antecipou o início da contagem."
                 />
-                <p v-if="ajuste.errors.justificativa" class="mt-1 text-sm text-red-600">
+                <p v-if="ajuste.errors.justificativa" class="mt-1 text-sm text-perigo">
                     {{ ajuste.errors.justificativa }}
                 </p>
-                <p class="mt-1 text-xs text-slate-500">Obrigatória. Fica no log de auditoria do prazo.</p>
+                <p class="mt-1 text-xs text-tinta-3">Obrigatória. Fica no log de auditoria do prazo.</p>
             </div>
         </div>
 

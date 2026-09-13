@@ -63,7 +63,7 @@ function enviar() {
         <template #acoes>
             <button
                 type="button"
-                class="flex h-11 w-11 items-center justify-center rounded-full bg-slate-900 text-white"
+                class="flex h-11 w-11 items-center justify-center rounded-full bg-acao text-sobre-acao"
                 aria-label="Novo cliente"
                 @click="folhaAberta = true"
             >
@@ -75,7 +75,7 @@ function enviar() {
     <div class="pagina">
         <div class="px-4 py-3">
             <div class="relative lg:max-w-md">
-                <Icone nome="busca" class="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+                <Icone nome="busca" class="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-tinta-icone" />
                 <input v-model="busca" type="search" class="campo pl-10" placeholder="Nome ou CPF" aria-label="Buscar clientes">
             </div>
         </div>
@@ -86,21 +86,21 @@ function enviar() {
             texto="Cadastre a pessoa uma vez e vincule os casos dela depois."
         />
 
-        <ul v-else class="cartao mx-4 mb-8 divide-y divide-slate-100 lg:grid lg:grid-cols-2 lg:gap-3 lg:divide-y-0 lg:border-0 lg:bg-transparent">
-            <li v-for="cliente in clientes.data" :key="cliente.id" class="lg:rounded-2xl lg:border lg:border-slate-200 lg:bg-white">
+        <ul v-else class="cartao mx-4 mb-8 divide-y divide-borda-sutil lg:grid lg:grid-cols-2 lg:gap-3 lg:divide-y-0 lg:border-0 lg:bg-transparent">
+            <li v-for="cliente in clientes.data" :key="cliente.id" class="lg:rounded-2xl lg:border lg:border-borda lg:bg-superficie">
                 <Link :href="`/clientes/${cliente.id}`" class="flex items-center gap-3 p-3.5">
-                    <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-slate-200 text-sm font-bold text-slate-600">
+                    <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-superficie-3 text-sm font-bold text-tinta-2">
                         {{ iniciais(cliente.nome) }}
                     </span>
 
                     <span class="min-w-0 flex-1">
-                        <span class="block truncate font-medium text-slate-900">{{ cliente.nome }}</span>
-                        <span class="block truncate text-sm text-slate-500">
+                        <span class="block truncate font-medium text-tinta">{{ cliente.nome }}</span>
+                        <span class="block truncate text-sm text-tinta-3">
                             {{ [cliente.telefone, cliente.documento].filter(Boolean).join(' · ') || 'sem contato' }}
                         </span>
                     </span>
 
-                    <span v-if="cliente.processos_ativos" class="shrink-0 text-xs font-semibold text-slate-500">
+                    <span v-if="cliente.processos_ativos" class="shrink-0 text-xs font-semibold text-tinta-3">
                         {{ cliente.processos_ativos }} {{ cliente.processos_ativos === 1 ? 'caso' : 'casos' }}
                     </span>
                 </Link>
@@ -113,7 +113,7 @@ function enviar() {
             <div>
                 <label class="rotulo" for="nome">Nome completo</label>
                 <input id="nome" v-model="formulario.nome" type="text" class="campo">
-                <p v-if="formulario.errors.nome" class="mt-1 text-sm text-red-600">{{ formulario.errors.nome }}</p>
+                <p v-if="formulario.errors.nome" class="mt-1 text-sm text-perigo">{{ formulario.errors.nome }}</p>
             </div>
 
             <div>
@@ -132,13 +132,13 @@ function enviar() {
                     </select>
                     <input v-model="contato.valor" type="text" class="campo" placeholder="(92) 90000-0000">
                 </div>
-                <button type="button" class="text-sm font-medium text-sky-700" @click="adicionarContato">
+                <button type="button" class="text-sm font-medium text-acento" @click="adicionarContato">
                     + adicionar contato
                 </button>
             </div>
 
-            <details class="rounded-2xl bg-white p-4 ring-1 ring-slate-200">
-                <summary class="cursor-pointer text-sm font-medium text-slate-700">Endereço</summary>
+            <details class="rounded-2xl bg-superficie p-4 ring-1 ring-borda">
+                <summary class="cursor-pointer text-sm font-medium text-tinta-2">Endereço</summary>
                 <div class="mt-3 space-y-3">
                     <input v-model="formulario.endereco.logradouro" type="text" class="campo" placeholder="Rua">
                     <div class="grid grid-cols-2 gap-3">

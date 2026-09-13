@@ -33,6 +33,24 @@ return [
         'teto_por_varredura' => (int) env('DJEN_TETO_VARREDURA', 300),
         // RF-1.8: rate limit do botao "sincronizar agora".
         'sync_manual_intervalo_min' => (int) env('DJEN_SYNC_MANUAL_MIN', 10),
+
+        /**
+         * Varredura pelo navegador do advogado.
+         *
+         * O DJEN responde 403 a IP estrangeiro e a API libera CORS para
+         * qualquer origem, entao o cliente consegue buscar o que o servidor
+         * hospedado fora do Brasil nao consegue. E rede de seguranca, nunca
+         * substituto do scheduler: so roda quando alguem abre o app.
+         */
+        'varredura_cliente' => filter_var(
+            env('DJEN_VARREDURA_CLIENTE', true),
+            FILTER_VALIDATE_BOOLEAN
+        ),
+
+        // Intervalo minimo entre varreduras automaticas do cliente, por termo.
+        // Segura o caso de varias abas e varias pessoas do escritorio abrindo
+        // o app na mesma manha.
+        'varredura_cliente_intervalo_min' => (int) env('DJEN_VARREDURA_CLIENTE_MIN', 60),
     ],
 
     'datajud' => [

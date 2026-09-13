@@ -28,24 +28,118 @@ class IngestaoService
     public function __construct(private readonly DjenClient $djen) {}
 
     /**
+     * Varredura feita pelo servidor: ele mesmo fala com o DJEN.
+     *
      * @return array{novas: int, total: int}
      */
     public function sincronizar(OabWatch $watch, ?CarbonImmutable $inicio = null, ?CarbonImmutable $fim = null): array
     {
+        [$inicio, $fim] = $this->janela($watch, $inicio, $fim);
+
+        return $this->executar(
+            $watch,
+            $inicio,
+            $fim,
+            fn () => $this->djen->buscar(ConsultaDjen::paraWatch($watch, $inicio, $fim)),
+            'servidor',
+        );
+    }
+
+    /**
+     * Mesma ingestao, com as comunicacoes buscadas pelo navegador do advogado.
+     *
+     * Existe porque o DJEN responde 403 a IP estrangeiro: onde o servidor nao
+     * alcanca a API, o cliente alcanca - ele esta no Brasil. O payload chega
+     * bruto e passa pelo mesmo ComunicacaoDto, mesmo teto de volume e mesma
+     * deduplicacao; nada aqui confia em campo ja interpretado pelo cliente.
+     *
+     * @param  array<int, array<string, mixed>>  $itens
+     * @return array{novas: int, total: int}
+     */
+    public function ingerirDoCliente(
+        OabWatch $watch,
+        array $itens,
+        CarbonImmutable $inicio,
+        CarbonImmutable $fim,
+    ): array {
+        return $this->executar(
+            $watch,
+            $inicio,
+            $fim,
+            fn () => array_map(
+                fn (array $item) => ComunicacaoDto::deArray($item),
+                array_values($itens),
+            ),
+            'cliente',
+        );
+    }
+
+    /**
+     * O cliente tentou e nao conseguiu falar com o DJEN.
+     *
+     * Precisa virar log e contar como falha igual a do servidor: senao o
+     * navegador vira um caminho por onde a varredura fracassa em silencio, e
+     * o "radar cego" do RF-1.10 nunca dispara.
+     */
+    public function registrarFalhaDoCliente(
+        OabWatch $watch,
+        string $erro,
+        CarbonImmutable $inicio,
+        CarbonImmutable $fim,
+    ): void {
+        try {
+            $this->executar(
+                $watch,
+                $inicio,
+                $fim,
+                fn () => throw new DjenIndisponivelException($erro),
+                'cliente',
+            );
+        } catch (Throwable) {
+            // executar() ja gravou o SyncLog e incrementou as falhas. A
+            // excecao so nao deve derrubar a resposta HTTP do cliente.
+        }
+    }
+
+    /**
+     * Janela efetiva da varredura, em datas de America/Sao_Paulo.
+     *
+     * Publica porque o plano entregue ao navegador precisa das mesmas datas
+     * que o servidor usaria.
+     *
+     * @return array{0: CarbonImmutable, 1: CarbonImmutable}
+     */
+    public function janela(
+        OabWatch $watch,
+        ?CarbonImmutable $inicio = null,
+        ?CarbonImmutable $fim = null,
+    ): array {
         $tz = config('mithrandir.timezone');
         $hoje = CarbonImmutable::now($tz)->startOfDay();
 
-        $fim ??= $hoje;
-        $inicio ??= $hoje->subDays($this->diasDaJanela($watch) - 1);
+        return [
+            $inicio ?? $hoje->subDays($this->diasDaJanela($watch) - 1),
+            $fim ?? $hoje,
+        ];
+    }
 
+    /**
+     * O corpo comum das duas varreduras: o que muda e so quem busca.
+     *
+     * @param  callable(): array<int, ComunicacaoDto>  $buscar
+     * @return array{novas: int, total: int}
+     */
+    private function executar(
+        OabWatch $watch,
+        CarbonImmutable $inicio,
+        CarbonImmutable $fim,
+        callable $buscar,
+        string $origem,
+    ): array {
         $comecou = microtime(true);
 
         try {
-            $comunicacoes = match ($watch->tipo) {
-                'oab' => $this->djen->porOab($watch->termo, $watch->uf ?? $watch->advogado->uf, $inicio, $fim),
-                'cliente' => $this->djen->porNomeParte($watch->termo, $watch->uf, $inicio, $fim),
-                default => $this->djen->porNome($watch->termo, $watch->uf, $inicio, $fim),
-            };
+            $comunicacoes = $buscar();
 
             $this->recusarVolumeAnormal($watch, count($comunicacoes));
 
@@ -60,6 +154,7 @@ class IngestaoService
                 'oab_watch_id' => $watch->id,
                 'executado_em' => now(),
                 'status' => 'sucesso',
+                'origem' => $origem,
                 'qtd_itens' => count($comunicacoes),
                 'qtd_novas' => $novas,
                 'janela_inicio' => $inicio,
@@ -80,6 +175,7 @@ class IngestaoService
                 'oab_watch_id' => $watch->id,
                 'executado_em' => now(),
                 'status' => 'falha',
+                'origem' => $origem,
                 'qtd_itens' => 0,
                 'janela_inicio' => $inicio,
                 'janela_fim' => $fim,
@@ -90,6 +186,7 @@ class IngestaoService
             Log::error('Falha na varredura do DJEN', [
                 'watch' => $watch->id,
                 'termo' => $watch->termo,
+                'origem' => $origem,
                 'erro' => $e->getMessage(),
             ]);
 

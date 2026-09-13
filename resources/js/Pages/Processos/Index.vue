@@ -40,7 +40,7 @@ function alternarArquivados() {
         <template #acoes>
             <Link
                 href="/casos/novo"
-                class="flex h-11 w-11 items-center justify-center rounded-full bg-slate-900 text-white"
+                class="flex h-11 w-11 items-center justify-center rounded-full bg-acao text-sobre-acao"
                 aria-label="Novo caso"
             >
                 <Icone nome="mais_circulo" class="h-5 w-5" />
@@ -51,7 +51,7 @@ function alternarArquivados() {
     <div class="pagina">
         <div class="px-4 py-3">
             <div class="relative lg:max-w-md">
-                <Icone nome="busca" class="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+                <Icone nome="busca" class="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-tinta-icone" />
                 <input
                     v-model="busca"
                     type="search"
@@ -63,7 +63,7 @@ function alternarArquivados() {
 
             <button
                 type="button"
-                class="mt-2 text-sm font-medium text-sky-700"
+                class="mt-2 text-sm font-medium text-acento"
                 @click="alternarArquivados"
             >
                 {{ filtros.arquivados ? 'Ver só os ativos' : 'Incluir arquivados' }}
@@ -85,29 +85,29 @@ function alternarArquivados() {
                 <Link :href="`/casos/${processo.id}`" class="block cartao p-4" :class="processo.arquivado ? 'opacity-60' : ''">
                     <div class="flex items-start justify-between gap-3">
                         <div class="min-w-0">
-                            <p class="truncate font-semibold text-slate-900">
+                            <p class="truncate font-semibold text-tinta">
                                 {{ processo.cliente ?? 'Sem cliente' }}
                             </p>
-                            <p class="truncate text-sm text-slate-600">{{ processo.rotulo }}</p>
+                            <p class="truncate text-sm text-tinta-2">{{ processo.rotulo }}</p>
                         </div>
 
                         <span
                             v-if="processo.prazos_abertos"
-                            class="shrink-0 rounded-full bg-slate-900 px-2 py-0.5 text-xs font-bold text-white"
+                            class="shrink-0 rounded-full bg-acao px-2 py-0.5 text-xs font-bold text-sobre-acao"
                         >
                             {{ processo.prazos_abertos }}
                         </span>
                     </div>
 
-                    <p v-if="processo.proxima_acao" class="mt-2 line-clamp-2 rounded-lg bg-amber-50 px-2.5 py-1.5 text-sm text-amber-900">
+                    <p v-if="processo.proxima_acao" class="mt-2 line-clamp-2 rounded-lg bg-atencao-fundo px-2.5 py-1.5 text-sm text-atencao-tinta">
                         {{ processo.proxima_acao }}
                     </p>
 
                     <div class="mt-2 flex flex-wrap gap-1.5">
-                        <span v-if="processo.tribunal" class="etiqueta bg-slate-100 text-slate-600">{{ processo.tribunal }}</span>
-                        <span v-if="processo.fase" class="etiqueta bg-slate-100 text-slate-600">{{ processo.fase }}</span>
-                        <span v-if="processo.area" class="etiqueta bg-slate-100 text-slate-600">{{ processo.area }}</span>
-                        <span v-if="processo.arquivado" class="etiqueta bg-slate-200 text-slate-700">arquivado</span>
+                        <span v-if="processo.tribunal" class="etiqueta bg-superficie-2 text-tinta-2">{{ processo.tribunal }}</span>
+                        <span v-if="processo.fase" class="etiqueta bg-superficie-2 text-tinta-2">{{ processo.fase }}</span>
+                        <span v-if="processo.area" class="etiqueta bg-superficie-2 text-tinta-2">{{ processo.area }}</span>
+                        <span v-if="processo.arquivado" class="etiqueta bg-superficie-3 text-tinta-2">arquivado</span>
                     </div>
                 </Link>
             </li>
@@ -120,7 +120,7 @@ function alternarArquivados() {
                 :href="link.url ?? '#'"
                 class="min-w-11 rounded-lg px-3 py-2 text-center text-sm"
                 :class="[
-                    link.active ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 ring-1 ring-slate-200',
+                    link.active ? 'bg-acao text-sobre-acao' : 'bg-superficie text-tinta-2 ring-1 ring-borda',
                     !link.url ? 'pointer-events-none opacity-40' : '',
                 ]"
                 v-html="link.label"

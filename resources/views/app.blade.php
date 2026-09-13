@@ -8,7 +8,10 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <meta name="description" content="Gestao de prazos, agenda e casos para advogados autonomos.">
-    <meta name="theme-color" content="#0f172a">
+    {{-- Acompanha --color-fundo nos dois temas. Um valor fixo escuro num app
+         claro deixa a barra de status descolada do topo da tela. --}}
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f6f8fa">
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#101318">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">

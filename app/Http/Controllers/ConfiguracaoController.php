@@ -117,6 +117,7 @@ class ConfiguracaoController extends Controller
                 'ultimos_logs' => $w->logs()->limit(5)->get()->map(fn ($l) => [
                     'executado_em' => $l->executado_em?->toIso8601String(),
                     'status' => $l->status,
+                    'origem' => $l->origem,
                     'qtd_itens' => $l->qtd_itens,
                     'qtd_novas' => $l->qtd_novas,
                     'erro' => $l->erro,

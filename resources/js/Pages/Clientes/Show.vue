@@ -175,20 +175,20 @@ const ROTULO_CANAL = {
     <div class="pagina space-y-3 px-4 lg:px-8 py-4 pb-8">
         <div class="cartao p-4">
             <div class="flex items-center gap-3">
-                <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-slate-200 text-lg font-bold text-slate-600">
+                <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-superficie-3 text-lg font-bold text-tinta-2">
                     {{ iniciais(cliente.nome) }}
                 </span>
                 <div class="min-w-0 flex-1">
-                    <p class="truncate font-semibold text-slate-900">{{ cliente.nome }}</p>
-                    <p v-if="cliente.documento_formatado" class="truncate font-mono text-xs text-slate-500">
+                    <p class="truncate font-semibold text-tinta">{{ cliente.nome }}</p>
+                    <p v-if="cliente.documento_formatado" class="truncate font-mono text-xs text-tinta-3">
                         {{ cliente.documento_formatado }}
                     </p>
-                    <p v-if="cliente.origem" class="truncate text-sm text-slate-500">via {{ cliente.origem }}</p>
+                    <p v-if="cliente.origem" class="truncate text-sm text-tinta-3">via {{ cliente.origem }}</p>
                 </div>
 
                 <button
                     type="button"
-                    class="shrink-0 rounded-lg bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-700"
+                    class="shrink-0 rounded-lg bg-superficie-2 px-3 py-2 text-xs font-semibold text-tinta-2"
                     @click="folhaEdicao = true"
                 >
                     editar
@@ -197,22 +197,22 @@ const ROTULO_CANAL = {
 
             <ul v-if="cliente.contatos?.length" class="mt-4 space-y-2">
                 <li v-for="(contato, indice) in cliente.contatos" :key="indice" class="flex items-center justify-between gap-2 text-sm">
-                    <span class="capitalize text-slate-500">{{ contato.tipo }}</span>
+                    <span class="capitalize text-tinta-3">{{ contato.tipo }}</span>
                     <a
                         :href="contato.tipo === 'email' ? `mailto:${contato.valor}` : `tel:${contato.valor}`"
-                        class="font-medium text-sky-700"
+                        class="font-medium text-acento"
                     >
                         {{ contato.valor }}
                     </a>
                 </li>
             </ul>
 
-            <p v-if="cliente.endereco?.logradouro" class="mt-3 border-t border-slate-100 pt-3 text-sm text-slate-600">
+            <p v-if="cliente.endereco?.logradouro" class="mt-3 border-t border-borda-sutil pt-3 text-sm text-tinta-2">
                 {{ [cliente.endereco.logradouro, cliente.endereco.numero, cliente.endereco.bairro,
                     cliente.endereco.cidade, cliente.endereco.uf].filter(Boolean).join(', ') }}
             </p>
 
-            <p v-if="cliente.observacoes" class="mt-3 whitespace-pre-wrap rounded-xl bg-slate-50 p-3 text-sm text-slate-700">
+            <p v-if="cliente.observacoes" class="mt-3 whitespace-pre-wrap rounded-xl bg-superficie-2 p-3 text-sm text-tinta-2">
                 {{ cliente.observacoes }}
             </p>
         </div>
@@ -222,27 +222,27 @@ const ROTULO_CANAL = {
             <div class="flex items-start justify-between gap-3">
                 <div class="min-w-0">
                     <h2 class="secao-titulo">Vigiar no DJEN</h2>
-                    <p class="mt-1 text-sm leading-relaxed text-slate-600">
+                    <p class="mt-1 text-sm leading-relaxed text-tinta-2">
                         Busca publicações em que esta pessoa apareça como <strong>parte</strong> do
                         processo, mesmo em caso que você ainda não cadastrou.
                     </p>
                 </div>
                 <span
                     class="etiqueta shrink-0"
-                    :class="vigilancia.ativa ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'"
+                    :class="vigilancia.ativa ? 'bg-ok-fundo text-ok-tinta' : 'bg-superficie-2 text-tinta-2'"
                 >
                     {{ vigilancia.ativa ? 'ligada' : 'desligada' }}
                 </span>
             </div>
 
-            <p v-if="vigilancia.ativa" class="mt-2 text-xs text-slate-500">
+            <p v-if="vigilancia.ativa" class="mt-2 text-xs text-tinta-3">
                 {{ vigilancia.publicacoes }} publicação(ões) capturadas.
                 <template v-if="vigilancia.ultima_sync_em">
                     Última busca {{ dataHora(vigilancia.ultima_sync_em) }}.
                 </template>
             </p>
 
-            <p v-if="vigilancia.cego" class="mt-2 rounded-xl bg-red-50 px-3 py-2 text-xs text-red-900 ring-1 ring-red-200">
+            <p v-if="vigilancia.cego" class="mt-2 rounded-xl bg-perigo-fundo px-3 py-2 text-xs text-perigo-tinta ring-1 ring-perigo-borda">
                 A varredura deste nome falhou duas vezes seguidas.
             </p>
 
@@ -250,7 +250,7 @@ const ROTULO_CANAL = {
                 {{ vigilancia.ativa ? 'Desligar vigilância' : 'Ligar vigilância' }}
             </button>
 
-            <p class="mt-2 text-xs leading-relaxed text-slate-400">
+            <p class="mt-2 text-xs leading-relaxed text-tinta-3">
                 A busca é por nome. O DJEN não permite consultar por CPF ou CNPJ — o documento
                 fica no cadastro para você conferir na triagem.
             </p>
@@ -261,23 +261,23 @@ const ROTULO_CANAL = {
                 Publicações em nome deste cliente
             </h2>
 
-            <ul class="cartao divide-y divide-slate-100">
+            <ul class="cartao divide-y divide-borda-sutil">
                 <li v-for="publicacao in publicacoes" :key="publicacao.id">
                     <Link :href="`/publicacoes/${publicacao.id}`" class="block p-3.5">
                         <span class="flex items-baseline justify-between gap-2">
-                            <span class="truncate text-sm font-medium text-slate-800">
+                            <span class="truncate text-sm font-medium text-tinta">
                                 {{ publicacao.tribunal ?? 'DJEN' }}
                             </span>
-                            <span class="shrink-0 font-mono text-xs text-slate-500">
+                            <span class="shrink-0 font-mono text-xs text-tinta-3">
                                 {{ dataCurta(publicacao.data_disponibilizacao) }}
                             </span>
                         </span>
-                        <span class="mt-1 line-clamp-2 block text-sm leading-snug text-slate-600">
+                        <span class="mt-1 line-clamp-2 block text-sm leading-snug text-tinta-2">
                             {{ publicacao.resumo }}
                         </span>
                         <span
                             v-if="publicacao.status_triagem === 'nova'"
-                            class="etiqueta mt-1.5 bg-sky-100 text-sky-800"
+                            class="etiqueta mt-1.5 bg-acento-fundo text-acento-tinta"
                         >
                             aguardando triagem
                         </span>
@@ -289,16 +289,16 @@ const ROTULO_CANAL = {
         <section>
             <h2 class="mb-2 px-1 secao-titulo">Casos</h2>
 
-            <p v-if="!processos.length" class="cartao p-5 text-center text-sm text-slate-500">
+            <p v-if="!processos.length" class="cartao p-5 text-center text-sm text-tinta-3">
                 Nenhum caso vinculado ainda.
             </p>
 
-            <ul v-else class="cartao divide-y divide-slate-100">
+            <ul v-else class="cartao divide-y divide-borda-sutil">
                 <li v-for="processo in processos" :key="processo.id" class="p-3.5">
                     <div class="flex items-start justify-between gap-3">
                         <Link :href="`/casos/${processo.id}`" class="min-w-0 flex-1">
-                            <span class="block truncate font-medium text-slate-900">{{ processo.rotulo }}</span>
-                            <span class="block text-sm capitalize text-slate-500">
+                            <span class="block truncate font-medium text-tinta">{{ processo.rotulo }}</span>
+                            <span class="block text-sm capitalize text-tinta-3">
                                 {{ processo.fase }}
                                 <template v-if="processo.arquivado"> · arquivado</template>
                             </span>
@@ -306,14 +306,14 @@ const ROTULO_CANAL = {
 
                         <button
                             type="button"
-                            class="shrink-0 rounded-lg bg-slate-100 px-2.5 py-1.5 text-xs font-semibold text-slate-700"
+                            class="shrink-0 rounded-lg bg-superficie-2 px-2.5 py-1.5 text-xs font-semibold text-tinta-2"
                             @click="gerarStatus(processo.id)"
                         >
                             copiar status
                         </button>
                     </div>
 
-                    <p v-if="processo.proxima_acao" class="mt-1.5 line-clamp-2 text-sm text-amber-800">
+                    <p v-if="processo.proxima_acao" class="mt-1.5 line-clamp-2 text-sm text-atencao-tinta">
                         {{ processo.proxima_acao }}
                     </p>
                 </li>
@@ -323,23 +323,23 @@ const ROTULO_CANAL = {
         <section>
             <div class="mb-2 flex items-baseline justify-between px-1">
                 <h2 class="secao-titulo">Atendimentos</h2>
-                <button type="button" class="text-sm font-medium text-sky-700" @click="folhaAtendimento = true">
+                <button type="button" class="text-sm font-medium text-acento" @click="folhaAtendimento = true">
                     registrar
                 </button>
             </div>
 
-            <p v-if="!atendimentos.length" class="cartao p-5 text-center text-sm text-slate-500">
+            <p v-if="!atendimentos.length" class="cartao p-5 text-center text-sm text-tinta-3">
                 Nenhum atendimento registrado.
             </p>
 
-            <ul v-else class="cartao divide-y divide-slate-100">
+            <ul v-else class="cartao divide-y divide-borda-sutil">
                 <li v-for="item in atendimentos" :key="item.id" class="p-3.5">
                     <p class="flex items-baseline justify-between gap-2">
-                        <span class="text-sm font-medium text-slate-800">{{ ROTULO_CANAL[item.canal] }}</span>
-                        <span class="font-mono text-xs text-slate-500">{{ dataCurta(item.data) }}</span>
+                        <span class="text-sm font-medium text-tinta">{{ ROTULO_CANAL[item.canal] }}</span>
+                        <span class="font-mono text-xs text-tinta-3">{{ dataCurta(item.data) }}</span>
                     </p>
-                    <p class="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-slate-600">{{ item.resumo }}</p>
-                    <p v-if="item.processo" class="mt-1 truncate text-xs text-slate-400">{{ item.processo }}</p>
+                    <p class="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-tinta-2">{{ item.resumo }}</p>
+                    <p v-if="item.processo" class="mt-1 truncate text-xs text-tinta-3">{{ item.processo }}</p>
                 </li>
             </ul>
         </section>
@@ -373,7 +373,7 @@ const ROTULO_CANAL = {
             <div>
                 <label class="rotulo" for="resumo">O que foi conversado</label>
                 <textarea id="resumo" v-model="atendimento.resumo" rows="5" class="campo" />
-                <p v-if="atendimento.errors.resumo" class="mt-1 text-sm text-red-600">{{ atendimento.errors.resumo }}</p>
+                <p v-if="atendimento.errors.resumo" class="mt-1 text-sm text-perigo">{{ atendimento.errors.resumo }}</p>
             </div>
         </div>
 
@@ -389,16 +389,16 @@ const ROTULO_CANAL = {
             <div>
                 <label class="rotulo" for="ed-nome">Nome completo</label>
                 <input id="ed-nome" v-model="edicao.nome" type="text" class="campo">
-                <p v-if="edicao.errors.nome" class="mt-1 text-sm text-red-600">{{ edicao.errors.nome }}</p>
+                <p v-if="edicao.errors.nome" class="mt-1 text-sm text-perigo">{{ edicao.errors.nome }}</p>
             </div>
 
             <div>
                 <label class="rotulo" for="ed-doc">CPF ou CNPJ</label>
                 <input id="ed-doc" v-model="edicao.documento" type="text" inputmode="numeric" class="campo">
-                <p class="mt-1 text-xs text-slate-500">
+                <p class="mt-1 text-xs text-tinta-3">
                     Pode digitar com ou sem pontuação — o app guarda dos dois jeitos.
                 </p>
-                <p v-if="edicao.errors.documento" class="mt-1 text-sm text-red-600">{{ edicao.errors.documento }}</p>
+                <p v-if="edicao.errors.documento" class="mt-1 text-sm text-perigo">{{ edicao.errors.documento }}</p>
             </div>
 
             <div>
@@ -419,20 +419,20 @@ const ROTULO_CANAL = {
                     <button
                         v-if="edicao.contatos.length > 1"
                         type="button"
-                        class="shrink-0 rounded-xl px-3 text-slate-400"
+                        class="shrink-0 rounded-xl px-3 text-tinta-3"
                         :aria-label="`Remover contato ${indice + 1}`"
                         @click="removerContato(indice)"
                     >
                         <Icone nome="x" class="h-5 w-5" />
                     </button>
                 </div>
-                <button type="button" class="text-sm font-medium text-sky-700" @click="adicionarContato">
+                <button type="button" class="text-sm font-medium text-acento" @click="adicionarContato">
                     + adicionar contato
                 </button>
             </div>
 
-            <details class="rounded-2xl bg-white p-4 ring-1 ring-slate-200" open>
-                <summary class="cursor-pointer text-sm font-medium text-slate-700">Endereço</summary>
+            <details class="rounded-2xl bg-superficie p-4 ring-1 ring-borda" open>
+                <summary class="cursor-pointer text-sm font-medium text-tinta-2">Endereço</summary>
                 <div class="mt-3 space-y-3">
                     <input v-model="edicao.endereco.logradouro" type="text" class="campo" placeholder="Rua">
                     <div class="grid grid-cols-2 gap-3">
@@ -457,7 +457,7 @@ const ROTULO_CANAL = {
                 <textarea id="ed-obs" v-model="edicao.observacoes" rows="4" class="campo" />
             </div>
 
-            <p class="text-xs leading-relaxed text-slate-500">
+            <p class="text-xs leading-relaxed text-tinta-3">
                 Mudar o nome aqui não renomeia o termo de vigilância no DJEN. Se o nome estava
                 errado, desligue e ligue a vigilância de novo para ela passar a buscar o nome novo.
             </p>
@@ -477,7 +477,7 @@ const ROTULO_CANAL = {
     >
         <div class="space-y-4">
             <template v-if="vigilancia.ativa">
-                <p class="text-sm leading-relaxed text-slate-600">
+                <p class="text-sm leading-relaxed text-tinta-2">
                     Ao desligar, o app para de buscar publicações no nome de
                     <strong>{{ cliente.nome }}</strong>. As {{ vigilancia.publicacoes }} já
                     capturadas continuam no inbox — publicação não se apaga.
@@ -485,12 +485,12 @@ const ROTULO_CANAL = {
             </template>
 
             <template v-else>
-                <p class="text-sm leading-relaxed text-slate-600">
+                <p class="text-sm leading-relaxed text-tinta-2">
                     O app vai buscar, todo dia, publicações em que
                     <strong>{{ cliente.nome }}</strong> apareça como parte.
                 </p>
 
-                <p v-if="carregandoPrevia" class="cartao p-4 text-center text-sm text-slate-500">
+                <p v-if="carregandoPrevia" class="cartao p-4 text-center text-sm text-tinta-3">
                     Consultando o DJEN para ver quantas viriam…
                 </p>
 
@@ -498,19 +498,19 @@ const ROTULO_CANAL = {
                     v-else-if="previa && !previa.erro"
                     class="rounded-2xl p-4 ring-1"
                     :class="previa.recomendado
-                        ? 'bg-emerald-50 text-emerald-900 ring-emerald-200'
-                        : 'bg-amber-50 text-amber-900 ring-amber-200'"
+                        ? 'bg-ok-fundo text-ok-tinta ring-ok-borda'
+                        : 'bg-atencao-fundo text-atencao-tinta ring-atencao-borda'"
                 >
                     <p class="text-2xl font-bold">{{ previa.quantidade }}</p>
                     <p class="text-xs font-medium opacity-80">publicações nos últimos 30 dias</p>
                     <p class="mt-2 text-sm leading-relaxed">{{ previa.mensagem }}</p>
                 </div>
 
-                <p v-else-if="previa?.erro" class="rounded-xl bg-red-50 p-3 text-sm text-red-800 ring-1 ring-red-200">
+                <p v-else-if="previa?.erro" class="rounded-xl bg-perigo-fundo p-3 text-sm text-perigo-tinta ring-1 ring-perigo-borda">
                     {{ previa.erro }}
                 </p>
 
-                <p class="text-xs leading-relaxed text-slate-500">
+                <p class="text-xs leading-relaxed text-tinta-3">
                     Homônimo é inevitável numa busca por nome: pessoas diferentes com o mesmo nome
                     caem no mesmo resultado. Por isso tudo entra na triagem e nada vira prazo sozinho.
                 </p>
@@ -530,11 +530,11 @@ const ROTULO_CANAL = {
     </Folha>
 
     <Folha :aberta="folhaStatus" titulo="Status para o cliente" @fechar="folhaStatus = false">
-        <p class="mb-3 text-sm leading-relaxed text-slate-600">
+        <p class="mb-3 text-sm leading-relaxed text-tinta-2">
             Texto pronto com a situação atual do caso. Confira antes de enviar — é você quem assina.
         </p>
 
-        <p v-if="carregandoStatus" class="cartao p-5 text-center text-sm text-slate-500">Montando…</p>
+        <p v-if="carregandoStatus" class="cartao p-5 text-center text-sm text-tinta-3">Montando…</p>
 
         <textarea v-else v-model="textoStatus" rows="14" class="campo font-normal leading-relaxed" />
 

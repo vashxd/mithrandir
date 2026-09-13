@@ -7,7 +7,7 @@
  *  - APIs de leitura: network-first com cache de emergência;
  *  - POST offline: nunca some — a tela enfileira no IndexedDB.
  */
-const VERSAO = 'mithrandir-v1';
+const VERSAO = 'mithrandir-v2';
 const CACHE_SHELL = `${VERSAO}-shell`;
 const CACHE_ASSETS = `${VERSAO}-assets`;
 const CACHE_DADOS = `${VERSAO}-dados`;

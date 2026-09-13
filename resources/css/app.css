@@ -1,33 +1,198 @@
 @import 'tailwindcss';
 
-@theme {
-    --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+/*
+ * Inter variavel, subconjunto latin (48 KB) — cobre todo o pt-BR. Servida do
+ * proprio dominio porque o app e um PWA offline: pendurar a fonte num CDN de
+ * terceiros faria o texto trocar de desenho justamente quando falta rede. O
+ * Vite emite o arquivo em /build/, que o service worker ja mantem em cache.
+ */
+@font-face {
+    font-family: 'Inter Variable';
+    font-style: normal;
+    font-display: swap;
+    font-weight: 100 900;
+    src: url('../fonts/inter-latin-wght-normal.woff2') format('woff2-variations');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+        U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191,
+        U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
 
-    /* Criticidade (RF-3.3). Fatal <= 3 dias uteis e vermelho, sem negociacao. */
-    --color-critico: oklch(0.58 0.21 27);
-    --color-atencao: oklch(0.75 0.16 75);
-    --color-normal: oklch(0.62 0.13 240);
-    --color-ok: oklch(0.65 0.15 155);
+/*
+ * `static` e obrigatorio: o modo escuro troca o VALOR das variaveis em :root,
+ * e o Tailwind so emite os tokens que ve usados em alguma classe. Sem isto,
+ * um token que so aparece na sobrescrita escura sumiria do CSS gerado.
+ *
+ * Nenhuma tela escreve cor crua. Toda cor abaixo tem um papel, e trocar o
+ * papel e trocar uma linha — foi isso que tornou o modo escuro possivel.
+ */
+@theme static {
+    --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
 
     /*
-     * Superficie clara com borda de 1px no lugar de sombra. O contraste entre
-     * o fundo e o cartao e sutil de proposito: quem separa os blocos e a
-     * borda, nao a elevacao.
+     * Superficies. O fundo e um passo mais escuro que o branco do cartao: e a
+     * borda que separa os blocos, mas o cartao precisa ter de onde subir.
      */
-    --color-fundo: oklch(0.984 0.002 258);
+    --color-fundo: oklch(0.978 0.003 258);
     --color-superficie: oklch(1 0 0);
-    --color-superficie-2: oklch(0.975 0.003 258);
-    --color-borda: oklch(0.922 0.005 258);
-    --color-borda-forte: oklch(0.87 0.007 258);
+    --color-superficie-2: oklch(0.965 0.005 258);
+    --color-superficie-3: oklch(0.928 0.006 258);
+    --color-borda-sutil: oklch(0.947 0.004 258);
+    --color-borda: oklch(0.917 0.006 258);
+    --color-borda-forte: oklch(0.862 0.008 258);
+    /* Veu de modal e sombra. No escuro fica mais preto, nao mais claro. */
+    --color-veu: oklch(0.21 0.03 262);
 
-    --color-acento: oklch(0.55 0.15 250);
-    --color-acento-suave: oklch(0.96 0.02 250);
+    /* Texto: tres degraus, nenhum abaixo de 4.5:1 sobre a superficie. */
+    --color-tinta: oklch(0.21 0.03 262);
+    --color-tinta-2: oklch(0.4 0.022 258);
+    --color-tinta-3: oklch(0.5 0.025 258);
+    /* Ícone e adorno — piso de 3:1 (WCAG 1.4.11). Nunca para texto: acima
+     * de um fundo quase branco não cabe um quarto degrau de texto a 4.5:1. */
+    --color-tinta-icone: oklch(0.62 0.018 258);
+
+    /*
+     * Acao neutra. O botao escuro fica — para um app de advogado ele e sobrio
+     * e certo. O que muda e a regra ficar explicita: neutro escuro = acao,
+     * azul = navegacao e estado. No escuro o par se inverte sozinho.
+     */
+    --color-acao: oklch(0.21 0.03 262);
+    --color-acao-hover: oklch(0.33 0.03 262);
+    --color-sobre-acao: oklch(1 0 0);
+    --color-neutro-solido: oklch(0.29 0.03 262);
+
+    /* Um acento so: link, aba ativa, foco, marcador de estado. */
+    --color-acento: oklch(0.52 0.14 245);
+    --color-acento-fundo: oklch(0.965 0.03 245);
+    --color-acento-borda: oklch(0.895 0.055 245);
+    --color-acento-tinta: oklch(0.4 0.11 245);
+    --color-acento-solido: oklch(0.5 0.14 245);
+
+    /*
+     * Criticidade (RF-3.3). O fundo e constante em L .965 / C .030 nos tres
+     * estados vivos: quem identifica e o matiz, quem carrega a urgencia e a
+     * barra e o peso do texto. Vencido rompe a regra de proposito — e o unico
+     * estado que nao pode passar despercebido.
+     */
+    --color-vencido: oklch(0.505 0.213 27);
+    --color-critico: oklch(0.577 0.245 27);
+    --color-critico-fundo: oklch(0.965 0.03 27);
+    --color-critico-borda: oklch(0.895 0.065 27);
+    --color-critico-tinta: oklch(0.4 0.145 27);
+
+    --color-atencao: oklch(0.64 0.175 68);
+    --color-atencao-fundo: oklch(0.965 0.03 75);
+    --color-atencao-borda: oklch(0.895 0.07 75);
+    --color-atencao-tinta: oklch(0.4 0.11 62);
+    /* Faixa de estado com texto branco — escuro o bastante para o contraste. */
+    --color-atencao-solido: oklch(0.545 0.16 62);
+
+    --color-normal: oklch(0.55 0.15 245);
+    --color-normal-fundo: oklch(0.965 0.03 245);
+    --color-normal-borda: oklch(0.895 0.055 245);
+    --color-normal-tinta: oklch(0.4 0.11 245);
+
+    /* Erro de formulario e acao destrutiva — papel diferente da criticidade. */
+    --color-perigo: oklch(0.545 0.215 27);
+    --color-perigo-hover: oklch(0.47 0.19 27);
+    --color-perigo-fundo: oklch(0.965 0.03 27);
+    --color-perigo-borda: oklch(0.895 0.065 27);
+    --color-perigo-tinta: oklch(0.43 0.16 27);
+    --color-perigo-solido: oklch(0.545 0.215 27);
+
+    --color-ok: oklch(0.54 0.13 163);
+    --color-ok-fundo: oklch(0.965 0.03 163);
+    --color-ok-borda: oklch(0.895 0.055 163);
+    --color-ok-tinta: oklch(0.39 0.1 163);
+    --color-ok-solido: oklch(0.51 0.12 163);
+
+    /* Trabalhando no espaco de outra pessoa. */
+    --color-info: oklch(0.52 0.17 295);
+    --color-info-fundo: oklch(0.965 0.03 295);
+    --color-info-borda: oklch(0.895 0.06 295);
+    --color-info-tinta: oklch(0.4 0.13 295);
+    --color-info-solido: oklch(0.48 0.18 295);
 
     /* Largura do trilho de navegacao no desktop. */
     --largura-trilho: 17rem;
 }
 
 @layer base {
+    /*
+     * O modo escuro inteiro. Nao ha uma variante `dark:` no app: o que muda e
+     * o valor do token, e as mesmas classes passam a pintar outra coisa. Um
+     * app de prazo se confere de noite, no celular, que ja esta em escuro.
+     */
+    :root {
+        color-scheme: light;
+    }
+
+    @media (prefers-color-scheme: dark) {
+        :root {
+            color-scheme: dark;
+
+            --color-fundo: oklch(0.185 0.012 262);
+            --color-superficie: oklch(0.235 0.014 262);
+            --color-superficie-2: oklch(0.278 0.013 262);
+            --color-superficie-3: oklch(0.335 0.015 262);
+            --color-borda-sutil: oklch(0.278 0.013 262);
+            --color-borda: oklch(0.305 0.014 262);
+            --color-borda-forte: oklch(0.375 0.016 262);
+            --color-veu: oklch(0.08 0.01 262);
+
+            --color-tinta: oklch(0.965 0.004 258);
+            --color-tinta-2: oklch(0.83 0.012 258);
+            --color-tinta-3: oklch(0.7 0.018 258);
+            --color-tinta-icone: oklch(0.6 0.016 258);
+
+            --color-acao: oklch(0.92 0.008 258);
+            --color-acao-hover: oklch(0.8 0.012 258);
+            --color-sobre-acao: oklch(0.195 0.02 262);
+            --color-neutro-solido: oklch(0.4 0.022 262);
+
+            --color-acento: oklch(0.74 0.12 245);
+            --color-acento-fundo: oklch(0.3 0.05 245);
+            --color-acento-borda: oklch(0.395 0.07 245);
+            --color-acento-tinta: oklch(0.9 0.055 245);
+            --color-acento-solido: oklch(0.52 0.14 245);
+
+            --color-vencido: oklch(0.52 0.205 27);
+            --color-critico: oklch(0.65 0.215 27);
+            --color-critico-fundo: oklch(0.295 0.055 27);
+            --color-critico-borda: oklch(0.395 0.085 27);
+            --color-critico-tinta: oklch(0.925 0.055 27);
+
+            --color-atencao: oklch(0.78 0.16 68);
+            --color-atencao-fundo: oklch(0.3 0.05 75);
+            --color-atencao-borda: oklch(0.398 0.07 75);
+            --color-atencao-tinta: oklch(0.925 0.055 85);
+            --color-atencao-solido: oklch(0.53 0.155 62);
+
+            --color-normal: oklch(0.7 0.13 245);
+            --color-normal-fundo: oklch(0.3 0.05 245);
+            --color-normal-borda: oklch(0.395 0.07 245);
+            --color-normal-tinta: oklch(0.915 0.05 245);
+
+            --color-perigo: oklch(0.72 0.17 27);
+            --color-perigo-hover: oklch(0.79 0.14 27);
+            --color-perigo-fundo: oklch(0.295 0.055 27);
+            --color-perigo-borda: oklch(0.395 0.085 27);
+            --color-perigo-tinta: oklch(0.925 0.06 27);
+            --color-perigo-solido: oklch(0.53 0.21 27);
+
+            --color-ok: oklch(0.74 0.135 163);
+            --color-ok-fundo: oklch(0.295 0.05 163);
+            --color-ok-borda: oklch(0.39 0.065 163);
+            --color-ok-tinta: oklch(0.92 0.055 163);
+            --color-ok-solido: oklch(0.53 0.125 163);
+
+            --color-info: oklch(0.76 0.13 295);
+            --color-info-fundo: oklch(0.3 0.055 295);
+            --color-info-borda: oklch(0.4 0.075 295);
+            --color-info-tinta: oklch(0.92 0.055 295);
+            --color-info-solido: oklch(0.51 0.175 295);
+        }
+    }
+
     html {
         -webkit-tap-highlight-color: transparent;
         -webkit-text-size-adjust: 100%;
@@ -37,6 +202,7 @@
         /* O app e usado em pe, no corredor do forum. */
         overscroll-behavior-y: none;
         background-color: var(--color-fundo);
+        color: var(--color-tinta);
         font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
     }
 
@@ -82,7 +248,7 @@
     }
 
     ::selection {
-        background-color: var(--color-acento-suave);
+        background-color: var(--color-acento-fundo);
     }
 }
 
@@ -149,41 +315,52 @@
 
 @layer components {
     .campo {
-        @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900
+        @apply w-full rounded-lg border border-borda-forte bg-superficie px-3 py-2.5 text-tinta
                outline-none transition
-               placeholder:text-slate-400
-               focus:border-sky-600 focus:ring-4 focus:ring-sky-600/10
-               disabled:bg-slate-100 disabled:text-slate-500;
+               placeholder:text-tinta-3
+               focus:border-acento focus:ring-4 focus:ring-acento/15
+               disabled:bg-superficie-2 disabled:text-tinta-3;
     }
 
     .rotulo {
-        @apply mb-1.5 block text-sm font-medium text-slate-700;
+        @apply mb-1.5 block text-sm font-medium text-tinta-2;
     }
 
     .btn-primario {
-        @apply btn bg-slate-900 text-white hover:bg-slate-700;
+        @apply btn bg-acao text-sobre-acao hover:bg-acao-hover;
     }
 
     .btn-secundario {
-        @apply btn border border-slate-300 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-50;
+        @apply btn border border-borda-forte bg-superficie text-tinta-2 hover:border-tinta-icone hover:bg-superficie-2;
     }
 
     .btn-perigo {
-        @apply btn bg-red-600 text-white hover:bg-red-700;
+        @apply btn bg-perigo-solido text-white hover:bg-perigo-hover;
     }
 
-    /* Superficie branca sobre fundo quase branco: quem separa e a borda. */
+    /* Superficie sobre o fundo: quem separa e a borda, a sombra so desgruda. */
     .cartao {
-        @apply rounded-2xl border border-slate-200 bg-white;
+        @apply rounded-2xl border border-borda bg-superficie;
+        box-shadow: 0 1px 2px color-mix(in oklab, var(--color-veu) 5%, transparent);
     }
 
     .etiqueta {
         @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium;
     }
 
+    /*
+     * Etiqueta dentro de um cartao ja tingido pela criticidade. O fundo sai do
+     * proprio currentColor, entao ela acompanha sozinha os cinco estados e os
+     * dois temas — inclusive o vencido, que e solido e tem texto branco.
+     */
+    .etiqueta-tinta {
+        @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium;
+        background-color: color-mix(in oklab, currentColor 14%, transparent);
+    }
+
     /* Cabecalho de bloco: "PRAZOS ATE 7 DIAS", "HOJE NA AGENDA". */
     .secao-titulo {
-        @apply text-xs font-semibold uppercase tracking-[0.08em] text-slate-500;
+        @apply text-xs font-semibold uppercase tracking-[0.08em] text-tinta-3;
     }
 }
 

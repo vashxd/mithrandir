@@ -1,7 +1,10 @@
 <script setup>
 import { computed, ref } from 'vue';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
-import { moeda, dataCurta, dataHora, contagem, CORES_CRITICIDADE, BARRA_CRITICIDADE } from '../../formato';
+import {
+    moeda, dataCurta, dataHora, contagem,
+    CORES_CRITICIDADE, BARRA_CRITICIDADE, ICONE_CRITICIDADE,
+} from '../../formato';
 import Cabecalho from '../../Components/Cabecalho.vue';
 import CapturaDocumento from '../../Components/CapturaDocumento.vue';
 import Folha from '../../Components/Folha.vue';
@@ -145,10 +148,10 @@ const ICONE_TIMELINE = {
     <div class="pagina">
         <!-- Próxima ação: o que a advogada precisa lembrar sobre o caso. -->
         <div class="px-4 pt-4">
-            <div class="rounded-2xl bg-amber-50 p-4 ring-1 ring-amber-200">
+            <div class="rounded-2xl bg-atencao-fundo p-4 ring-1 ring-atencao-borda">
                 <div class="flex items-baseline justify-between gap-2">
-                    <p class="text-xs font-bold uppercase tracking-wide text-amber-900">Próxima ação</p>
-                    <button type="button" class="text-xs font-semibold text-amber-900 underline" @click="editandoAcao = !editandoAcao">
+                    <p class="text-xs font-bold uppercase tracking-wide text-atencao-tinta">Próxima ação</p>
+                    <button type="button" class="text-xs font-semibold text-atencao-tinta underline" @click="editandoAcao = !editandoAcao">
                         {{ editandoAcao ? 'cancelar' : 'editar' }}
                     </button>
                 </div>
@@ -158,7 +161,7 @@ const ICONE_TIMELINE = {
                     <button type="button" class="btn-primario mt-2 w-full" @click="salvarAcao">Salvar</button>
                 </template>
 
-                <p v-else class="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-amber-900">
+                <p v-else class="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-atencao-tinta">
                     {{ processo.proxima_acao || 'Nada anotado ainda.' }}
                 </p>
             </div>
@@ -170,7 +173,7 @@ const ICONE_TIMELINE = {
                 :key="item.chave"
                 type="button"
                 class="shrink-0 rounded-full px-3.5 py-2 text-sm font-medium"
-                :class="aba === item.chave ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 ring-1 ring-slate-200'"
+                :class="aba === item.chave ? 'bg-acao text-sobre-acao' : 'bg-superficie text-tinta-2 ring-1 ring-borda'"
                 @click="aba = item.chave"
             >
                 {{ item.rotulo }}
@@ -183,53 +186,53 @@ const ICONE_TIMELINE = {
             <div class="cartao p-4">
                 <dl class="grid grid-cols-2 gap-3 text-sm">
                     <div v-if="processo.numero_formatado" class="col-span-2">
-                        <dt class="text-xs font-medium text-slate-500">Número CNJ</dt>
-                        <dd class="font-mono text-slate-900">{{ processo.numero_formatado }}</dd>
+                        <dt class="text-xs font-medium text-tinta-3">Número CNJ</dt>
+                        <dd class="font-mono text-tinta">{{ processo.numero_formatado }}</dd>
                     </div>
                     <div v-if="processo.tribunal">
-                        <dt class="text-xs font-medium text-slate-500">Tribunal</dt>
-                        <dd class="text-slate-800">{{ processo.tribunal }}</dd>
+                        <dt class="text-xs font-medium text-tinta-3">Tribunal</dt>
+                        <dd class="text-tinta">{{ processo.tribunal }}</dd>
                     </div>
                     <div v-if="processo.fase">
-                        <dt class="text-xs font-medium text-slate-500">Fase</dt>
-                        <dd class="text-slate-800">{{ processo.fase }}</dd>
+                        <dt class="text-xs font-medium text-tinta-3">Fase</dt>
+                        <dd class="text-tinta">{{ processo.fase }}</dd>
                     </div>
                     <div v-if="processo.vara" class="col-span-2">
-                        <dt class="text-xs font-medium text-slate-500">Vara</dt>
-                        <dd class="text-slate-800">{{ processo.vara }}</dd>
+                        <dt class="text-xs font-medium text-tinta-3">Vara</dt>
+                        <dd class="text-tinta">{{ processo.vara }}</dd>
                     </div>
                     <div v-if="processo.classe" class="col-span-2">
-                        <dt class="text-xs font-medium text-slate-500">Classe</dt>
-                        <dd class="text-slate-800">{{ processo.classe }}</dd>
+                        <dt class="text-xs font-medium text-tinta-3">Classe</dt>
+                        <dd class="text-tinta">{{ processo.classe }}</dd>
                     </div>
                     <div v-if="processo.assunto" class="col-span-2">
-                        <dt class="text-xs font-medium text-slate-500">Assunto</dt>
-                        <dd class="text-slate-800">{{ processo.assunto }}</dd>
+                        <dt class="text-xs font-medium text-tinta-3">Assunto</dt>
+                        <dd class="text-tinta">{{ processo.assunto }}</dd>
                     </div>
                     <div v-if="processo.valor_causa">
-                        <dt class="text-xs font-medium text-slate-500">Valor da causa</dt>
-                        <dd class="text-slate-800">{{ moeda(processo.valor_causa) }}</dd>
+                        <dt class="text-xs font-medium text-tinta-3">Valor da causa</dt>
+                        <dd class="text-tinta">{{ moeda(processo.valor_causa) }}</dd>
                     </div>
                 </dl>
 
-                <div class="mt-3 flex items-center justify-between gap-2 border-t border-slate-100 pt-3">
+                <div class="mt-3 flex items-center justify-between gap-2 border-t border-borda-sutil pt-3">
                     <Link
                         v-if="processo.cliente"
                         :href="`/clientes/${processo.cliente.id}`"
-                        class="flex min-w-0 items-center gap-2 text-sm font-medium text-sky-700"
+                        class="flex min-w-0 items-center gap-2 text-sm font-medium text-acento"
                     >
                         <Icone nome="pessoa" class="h-4 w-4 shrink-0" />
                         <span class="truncate">{{ processo.cliente.nome }}</span>
                     </Link>
 
-                    <span v-else class="flex items-center gap-2 text-sm text-slate-500">
+                    <span v-else class="flex items-center gap-2 text-sm text-tinta-3">
                         <Icone nome="pessoa" class="h-4 w-4 shrink-0" />
                         Sem cliente vinculado
                     </span>
 
                     <button
                         type="button"
-                        class="shrink-0 rounded-lg bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-700"
+                        class="shrink-0 rounded-lg bg-superficie-2 px-3 py-2 text-xs font-semibold text-tinta-2"
                         @click="folhaEdicao = true"
                     >
                         {{ processo.cliente ? 'editar' : 'vincular cliente' }}
@@ -241,8 +244,8 @@ const ICONE_TIMELINE = {
                 <h2 class="mb-2 secao-titulo">Partes</h2>
                 <ul class="space-y-1.5 text-sm">
                     <li v-for="parte in processo.partes" :key="parte.id" class="flex justify-between gap-2">
-                        <span class="text-slate-800">{{ parte.nome }}</span>
-                        <span class="shrink-0 capitalize text-slate-500">{{ parte.tipo }}</span>
+                        <span class="text-tinta">{{ parte.nome }}</span>
+                        <span class="shrink-0 capitalize text-tinta-3">{{ parte.tipo }}</span>
                     </li>
                 </ul>
             </div>
@@ -258,26 +261,26 @@ const ICONE_TIMELINE = {
                 {{ importando ? 'Consultando…' : 'Atualizar pelo DataJud' }}
             </button>
 
-            <p v-if="processo.datajud_sincronizado_em" class="text-center text-xs text-slate-400">
+            <p v-if="processo.datajud_sincronizado_em" class="text-center text-xs text-tinta-3">
                 Última consulta ao DataJud em {{ dataHora(processo.datajud_sincronizado_em) }}.
                 O DataJud enriquece o caso, mas nunca dispara prazo.
             </p>
 
             <!-- Timeline do caso -->
             <div v-if="timeline.length" class="cartao overflow-hidden">
-                <h2 class="border-b border-slate-100 px-4 py-3 secao-titulo">
+                <h2 class="border-b border-borda-sutil px-4 py-3 secao-titulo">
                     Histórico
                 </h2>
-                <ul class="divide-y divide-slate-100">
+                <ul class="divide-y divide-borda-sutil">
                     <li v-for="(item, indice) in timeline" :key="indice" class="flex gap-3 p-3.5">
-                        <Icone :nome="ICONE_TIMELINE[item.tipo]" class="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
+                        <Icone :nome="ICONE_TIMELINE[item.tipo]" class="mt-0.5 h-4 w-4 shrink-0 text-tinta-icone" />
                         <div class="min-w-0 flex-1">
                             <p class="flex items-baseline justify-between gap-2">
-                                <span class="truncate text-sm font-medium text-slate-800">{{ item.titulo }}</span>
-                                <span class="shrink-0 font-mono text-xs text-slate-500">{{ dataCurta(item.data) }}</span>
+                                <span class="truncate text-sm font-medium text-tinta">{{ item.titulo }}</span>
+                                <span class="shrink-0 font-mono text-xs text-tinta-3">{{ dataCurta(item.data) }}</span>
                             </p>
-                            <p class="mt-0.5 line-clamp-2 text-sm text-slate-500">{{ item.detalhe }}</p>
-                            <Link v-if="item.url" :href="item.url" class="mt-1 inline-block text-xs font-medium text-sky-700">
+                            <p class="mt-0.5 line-clamp-2 text-sm text-tinta-3">{{ item.detalhe }}</p>
+                            <Link v-if="item.url" :href="item.url" class="mt-1 inline-block text-xs font-medium text-acento">
                                 abrir
                             </Link>
                         </div>
@@ -285,15 +288,18 @@ const ICONE_TIMELINE = {
                 </ul>
             </div>
 
-            <button type="button" class="btn-secundario w-full text-slate-500" @click="arquivar">
+            <button type="button" class="btn-secundario w-full text-tinta-3" @click="arquivar">
                 {{ processo.arquivado ? 'Reabrir caso' : 'Arquivar caso' }}
             </button>
-            <p class="text-center text-xs text-slate-400">Arquivar não apaga nada do histórico.</p>
+            <p class="text-center text-xs leading-relaxed text-tinta-3">
+                Arquivar não apaga nada e não fecha prazo: os que estiverem em aberto continuam
+                na agenda, na tela Hoje e continuam alertando.
+            </p>
         </section>
 
         <!-- ---------------- Prazos ---------------- -->
         <section v-show="aba === 'prazos'" class="space-y-2 px-4 pb-8">
-            <p v-if="!prazos.length" class="cartao p-6 text-center text-sm text-slate-500">
+            <p v-if="!prazos.length" class="cartao p-6 text-center text-sm text-tinta-3">
                 Nenhum prazo neste caso.
             </p>
 
@@ -301,13 +307,16 @@ const ICONE_TIMELINE = {
                 v-for="prazo in prazos"
                 :key="prazo.id"
                 :href="`/prazos/${prazo.id}`"
-                class="flex overflow-hidden rounded-2xl bg-white ring-1"
+                class="flex overflow-hidden rounded-2xl ring-1"
                 :class="CORES_CRITICIDADE[prazo.criticidade]"
             >
                 <span class="w-1.5 shrink-0" :class="BARRA_CRITICIDADE[prazo.criticidade]" />
                 <span class="flex flex-1 items-start justify-between gap-3 p-3.5">
                     <span class="min-w-0">
-                        <span class="block truncate font-semibold">{{ prazo.tipo }}</span>
+                        <span class="flex items-center gap-1.5">
+                            <Icone :nome="ICONE_CRITICIDADE[prazo.criticidade]" class="h-3.5 w-3.5 shrink-0" />
+                            <span class="truncate font-semibold">{{ prazo.tipo }}</span>
+                        </span>
                         <span class="block text-xs opacity-75">alvo {{ dataCurta(prazo.data_alvo) }}</span>
                     </span>
                     <span class="shrink-0 text-right">
@@ -326,55 +335,55 @@ const ICONE_TIMELINE = {
             <div class="cartao p-4">
                 <div class="flex items-baseline justify-between gap-2">
                     <h2 class="secao-titulo">Checklist</h2>
-                    <button type="button" class="text-xs font-semibold text-sky-700" @click="folhaChecklist = true">
+                    <button type="button" class="text-xs font-semibold text-acento" @click="folhaChecklist = true">
                         {{ checklist.total ? 'trocar modelo' : 'aplicar modelo' }}
                     </button>
                 </div>
 
                 <template v-if="checklist.total">
                     <div class="mt-3 flex items-center gap-3">
-                        <div class="h-2 flex-1 overflow-hidden rounded-full bg-slate-200">
-                            <div class="h-full rounded-full bg-emerald-500 transition-all" :style="{ width: `${checklist.percentual}%` }" />
+                        <div class="h-2 flex-1 overflow-hidden rounded-full bg-superficie-3">
+                            <div class="h-full rounded-full bg-ok-solido transition-all" :style="{ width: `${checklist.percentual}%` }" />
                         </div>
-                        <span class="shrink-0 text-sm font-bold text-slate-700">{{ checklist.percentual }}%</span>
+                        <span class="shrink-0 text-sm font-bold text-tinta-2">{{ checklist.percentual }}%</span>
                     </div>
 
-                    <p class="mt-1 text-xs text-slate-500">
+                    <p class="mt-1 text-xs text-tinta-3">
                         {{ checklist.concluidos }} de {{ checklist.obrigatorios }} documentos obrigatórios
                     </p>
 
-                    <ul class="mt-3 divide-y divide-slate-100">
+                    <ul class="mt-3 divide-y divide-borda-sutil">
                         <li v-for="item in checklist.itens" :key="item.id" class="flex items-center gap-2.5 py-2.5">
                             <span
                                 class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full"
-                                :class="item.documento_id ? 'bg-emerald-500 text-white' : 'bg-slate-200'"
+                                :class="item.documento_id ? 'bg-ok-solido text-white' : 'bg-superficie-3'"
                             >
                                 <Icone v-if="item.documento_id" nome="check" class="h-3.5 w-3.5" />
                             </span>
                             <span class="min-w-0 flex-1">
-                                <span class="block truncate text-sm" :class="item.documento_id ? 'text-slate-500 line-through' : 'text-slate-800'">
+                                <span class="block truncate text-sm" :class="item.documento_id ? 'text-tinta-3 line-through' : 'text-tinta'">
                                     {{ item.item }}
                                 </span>
-                                <span v-if="item.documento_nome" class="block truncate text-xs text-slate-400">
+                                <span v-if="item.documento_nome" class="block truncate text-xs text-tinta-3">
                                     {{ item.documento_nome }}
                                 </span>
                             </span>
-                            <span v-if="!item.obrigatorio" class="etiqueta shrink-0 bg-slate-100 text-slate-500">opcional</span>
+                            <span v-if="!item.obrigatorio" class="etiqueta shrink-0 bg-superficie-2 text-tinta-3">opcional</span>
                         </li>
                     </ul>
                 </template>
 
-                <p v-else class="mt-2 text-sm text-slate-500">
+                <p v-else class="mt-2 text-sm text-tinta-3">
                     Nenhum checklist aplicado. Escolha um modelo para saber o que ainda falta pedir ao cliente.
                 </p>
             </div>
 
-            <ul v-if="documentos.length" class="cartao divide-y divide-slate-100">
+            <ul v-if="documentos.length" class="cartao divide-y divide-borda-sutil">
                 <li v-for="documento in documentos" :key="documento.id" class="flex items-center gap-3 p-3.5">
-                    <Icone nome="documento" class="h-5 w-5 shrink-0 text-slate-400" />
+                    <Icone nome="documento" class="h-5 w-5 shrink-0 text-tinta-icone" />
                     <a :href="`/documentos/${documento.id}`" class="min-w-0 flex-1">
-                        <span class="block truncate text-sm font-medium text-slate-800">{{ documento.nome }}</span>
-                        <span class="block text-xs text-slate-500">
+                        <span class="block truncate text-sm font-medium text-tinta">{{ documento.nome }}</span>
+                        <span class="block text-xs text-tinta-3">
                             {{ documento.tipo_rotulo }} · {{ documento.tamanho }}
                             <template v-if="documento.origem === 'camera'"> · foto</template>
                         </span>
@@ -384,7 +393,7 @@ const ICONE_TIMELINE = {
                         method="delete"
                         as="button"
                         type="button"
-                        class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-slate-400 active:bg-slate-100"
+                        class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-tinta-icone active:bg-superficie-2"
                         aria-label="Remover documento"
                     >
                         <Icone nome="x" class="h-5 w-5" />
@@ -397,16 +406,16 @@ const ICONE_TIMELINE = {
         <section v-show="aba === 'financeiro'" class="space-y-3 px-4 pb-8">
             <div class="grid grid-cols-3 gap-2">
                 <div class="cartao p-3">
-                    <p class="text-xs text-slate-500">Contratado</p>
-                    <p class="mt-0.5 text-sm font-bold text-slate-900">{{ moeda(financeiro.contratado) }}</p>
+                    <p class="text-xs text-tinta-3">Contratado</p>
+                    <p class="mt-0.5 text-sm font-bold text-tinta">{{ moeda(financeiro.contratado) }}</p>
                 </div>
                 <div class="cartao p-3">
-                    <p class="text-xs text-slate-500">Recebido</p>
-                    <p class="mt-0.5 text-sm font-bold text-emerald-700">{{ moeda(financeiro.recebido) }}</p>
+                    <p class="text-xs text-tinta-3">Recebido</p>
+                    <p class="mt-0.5 text-sm font-bold text-ok">{{ moeda(financeiro.recebido) }}</p>
                 </div>
                 <div class="cartao p-3">
-                    <p class="text-xs text-slate-500">A receber</p>
-                    <p class="mt-0.5 text-sm font-bold text-slate-900">{{ moeda(financeiro.a_receber) }}</p>
+                    <p class="text-xs text-tinta-3">A receber</p>
+                    <p class="mt-0.5 text-sm font-bold text-tinta">{{ moeda(financeiro.a_receber) }}</p>
                 </div>
             </div>
 
@@ -417,25 +426,25 @@ const ICONE_TIMELINE = {
 
             <div v-for="h in financeiro.honorarios" :key="h.id" class="cartao p-4">
                 <div class="flex items-baseline justify-between">
-                    <p class="text-sm font-semibold capitalize text-slate-900">{{ h.tipo }}</p>
-                    <p class="font-bold text-slate-900">{{ moeda(h.valor) }}</p>
+                    <p class="text-sm font-semibold capitalize text-tinta">{{ h.tipo }}</p>
+                    <p class="font-bold text-tinta">{{ moeda(h.valor) }}</p>
                 </div>
-                <p v-if="h.percentual_exito" class="text-xs text-slate-500">{{ h.percentual_exito }}% de êxito</p>
+                <p v-if="h.percentual_exito" class="text-xs text-tinta-3">{{ h.percentual_exito }}% de êxito</p>
 
-                <ul v-if="h.parcelas.length" class="mt-3 divide-y divide-slate-100">
+                <ul v-if="h.parcelas.length" class="mt-3 divide-y divide-borda-sutil">
                     <li v-for="parcela in h.parcelas" :key="parcela.id" class="flex items-center justify-between gap-2 py-2 text-sm">
-                        <span class="text-slate-600">
+                        <span class="text-tinta-2">
                             {{ parcela.numero }}ª · {{ dataCurta(parcela.vencimento) }}
                         </span>
                         <span class="flex items-center gap-2">
-                            <span class="font-medium text-slate-900">{{ moeda(parcela.valor) }}</span>
+                            <span class="font-medium text-tinta">{{ moeda(parcela.valor) }}</span>
                             <span
                                 class="etiqueta"
                                 :class="{
-                                    'bg-emerald-100 text-emerald-800': parcela.situacao === 'pago',
-                                    'bg-red-100 text-red-800': parcela.situacao === 'vencido',
-                                    'bg-amber-100 text-amber-800': parcela.situacao === 'vencendo',
-                                    'bg-slate-100 text-slate-600': parcela.situacao === 'a_vencer',
+                                    'bg-ok-fundo text-ok-tinta': parcela.situacao === 'pago',
+                                    'bg-perigo-fundo text-perigo-tinta': parcela.situacao === 'vencido',
+                                    'bg-atencao-fundo text-atencao-tinta': parcela.situacao === 'vencendo',
+                                    'bg-superficie-2 text-tinta-2': parcela.situacao === 'a_vencer',
                                 }"
                             >
                                 {{ parcela.situacao === 'a_vencer' ? 'a vencer' : parcela.situacao }}
@@ -446,7 +455,7 @@ const ICONE_TIMELINE = {
                                 method="post"
                                 as="button"
                                 type="button"
-                                class="rounded-lg bg-slate-900 px-2.5 py-1 text-xs font-semibold text-white"
+                                class="rounded-lg bg-acao px-2.5 py-1 text-xs font-semibold text-sobre-acao"
                                 preserve-scroll
                             >
                                 baixar
@@ -458,15 +467,15 @@ const ICONE_TIMELINE = {
 
             <div v-if="financeiro.despesas.length" class="cartao p-4">
                 <h2 class="mb-2 secao-titulo">Despesas</h2>
-                <ul class="divide-y divide-slate-100">
+                <ul class="divide-y divide-borda-sutil">
                     <li v-for="despesa in financeiro.despesas" :key="despesa.id" class="flex items-baseline justify-between gap-2 py-2 text-sm">
                         <span class="min-w-0">
-                            <span class="block truncate text-slate-800">{{ despesa.descricao }}</span>
-                            <span class="block font-mono text-xs text-slate-500">{{ dataCurta(despesa.data) }}</span>
+                            <span class="block truncate text-tinta">{{ despesa.descricao }}</span>
+                            <span class="block font-mono text-xs text-tinta-3">{{ dataCurta(despesa.data) }}</span>
                         </span>
                         <span class="shrink-0 text-right">
-                            <span class="block font-medium text-slate-900">{{ moeda(despesa.valor) }}</span>
-                            <span v-if="despesa.reembolsavel" class="block text-xs text-slate-500">
+                            <span class="block font-medium text-tinta">{{ moeda(despesa.valor) }}</span>
+                            <span v-if="despesa.reembolsavel" class="block text-xs text-tinta-3">
                                 {{ despesa.reembolsada ? 'reembolsada' : 'reembolsável' }}
                             </span>
                         </span>
@@ -484,10 +493,10 @@ const ICONE_TIMELINE = {
                     <option :value="null">Sem cliente vinculado</option>
                     <option v-for="c in clientes" :key="c.id" :value="c.id">{{ c.nome }}</option>
                 </select>
-                <p class="mt-1 text-xs text-slate-500">
+                <p class="mt-1 text-xs text-tinta-3">
                     Vincular um cliente aqui faz o caso aparecer na ficha dele.
                 </p>
-                <p v-if="edicao.errors.cliente_id" class="mt-1 text-sm text-red-600">
+                <p v-if="edicao.errors.cliente_id" class="mt-1 text-sm text-perigo">
                     {{ edicao.errors.cliente_id }}
                 </p>
             </div>
@@ -507,10 +516,10 @@ const ICONE_TIMELINE = {
                     class="campo font-mono"
                     placeholder="0000000-00.0000.0.00.0000"
                 >
-                <p v-if="edicao.errors.numero_cnj" class="mt-1 text-sm text-red-600">
+                <p v-if="edicao.errors.numero_cnj" class="mt-1 text-sm text-perigo">
                     {{ edicao.errors.numero_cnj }}
                 </p>
-                <p v-else class="mt-1 text-xs text-slate-500">
+                <p v-else class="mt-1 text-xs text-tinta-3">
                     O dígito verificador é conferido ao salvar.
                 </p>
             </div>
@@ -566,9 +575,9 @@ const ICONE_TIMELINE = {
                 <input id="ec-valor" v-model.number="edicao.valor_causa" type="number" step="0.01" min="0" class="campo">
             </div>
 
-            <label class="flex items-center gap-2.5 rounded-2xl bg-white p-4 ring-1 ring-slate-200">
-                <input v-model="edicao.segredo_justica" type="checkbox" class="h-5 w-5 rounded border-slate-300">
-                <span class="text-sm text-slate-800">Corre em segredo de justiça</span>
+            <label class="flex items-center gap-2.5 rounded-2xl bg-superficie p-4 ring-1 ring-borda">
+                <input v-model="edicao.segredo_justica" type="checkbox" class="h-5 w-5 rounded border-borda-forte">
+                <span class="text-sm text-tinta">Corre em segredo de justiça</span>
             </label>
         </div>
 
@@ -584,13 +593,13 @@ const ICONE_TIMELINE = {
             <label
                 v-for="template in templates"
                 :key="template.id"
-                class="flex items-center gap-3 rounded-2xl bg-white p-4 ring-1"
-                :class="templateEscolhido === template.id ? 'ring-slate-900' : 'ring-slate-200'"
+                class="flex items-center gap-3 rounded-2xl bg-superficie p-4 ring-1"
+                :class="templateEscolhido === template.id ? 'ring-acao' : 'ring-borda'"
             >
                 <input v-model="templateEscolhido" type="radio" :value="template.id" class="h-5 w-5">
                 <span>
-                    <span class="block font-medium text-slate-900">{{ template.nome }}</span>
-                    <span class="block text-sm capitalize text-slate-500">{{ template.area }}</span>
+                    <span class="block font-medium text-tinta">{{ template.nome }}</span>
+                    <span class="block text-sm capitalize text-tinta-3">{{ template.area }}</span>
                 </span>
             </label>
         </div>
@@ -633,7 +642,7 @@ const ICONE_TIMELINE = {
                 <div>
                     <label class="rotulo" for="venc">Primeiro vencimento</label>
                     <input id="venc" v-model="honorario.primeiro_vencimento" type="date" class="campo">
-                    <p v-if="honorario.errors.primeiro_vencimento" class="mt-1 text-sm text-red-600">
+                    <p v-if="honorario.errors.primeiro_vencimento" class="mt-1 text-sm text-perigo">
                         {{ honorario.errors.primeiro_vencimento }}
                     </p>
                 </div>

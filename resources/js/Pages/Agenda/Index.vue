@@ -103,7 +103,7 @@ const ICONE_TIPO = {
         <template #acoes>
             <button
                 type="button"
-                class="flex h-11 w-11 items-center justify-center rounded-full bg-slate-900 text-white"
+                class="flex h-11 w-11 items-center justify-center rounded-full bg-acao text-sobre-acao"
                 aria-label="Novo compromisso"
                 @click="folhaAberta = true"
             >
@@ -119,7 +119,7 @@ const ICONE_TIPO = {
                 :key="opcao.chave"
                 type="button"
                 class="shrink-0 rounded-full px-3.5 py-2 text-sm font-medium"
-                :class="visao === opcao.chave ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 ring-1 ring-slate-200'"
+                :class="visao === opcao.chave ? 'bg-acao text-sobre-acao' : 'bg-superficie text-tinta-2 ring-1 ring-borda'"
                 @click="mudarVisao(opcao.chave)"
             >
                 {{ opcao.rotulo }}
@@ -129,14 +129,14 @@ const ICONE_TIPO = {
         <div class="flex items-center justify-between px-4 pb-3">
             <button
                 type="button"
-                class="flex h-11 w-11 items-center justify-center rounded-full text-slate-600 active:bg-slate-200"
+                class="flex h-11 w-11 items-center justify-center rounded-full text-tinta-2 active:bg-superficie-3"
                 aria-label="Período anterior"
                 @click="navegar(-1)"
             >
                 <Icone nome="voltar" class="h-5 w-5" />
             </button>
 
-            <p class="text-sm font-semibold text-slate-700">
+            <p class="text-sm font-semibold text-tinta-2">
                 {{ janela.de === janela.ate
                     ? dataLonga(janela.de)
                     : `${dataCurta(janela.de)} – ${dataCurta(janela.ate)}` }}
@@ -144,7 +144,7 @@ const ICONE_TIPO = {
 
             <button
                 type="button"
-                class="flex h-11 w-11 items-center justify-center rounded-full text-slate-600 active:bg-slate-200"
+                class="flex h-11 w-11 items-center justify-center rounded-full text-tinta-2 active:bg-superficie-3"
                 aria-label="Próximo período"
                 @click="navegar(1)"
             >
@@ -163,15 +163,15 @@ const ICONE_TIPO = {
                 <h2 class="mb-2 flex items-baseline gap-2">
                     <span
                         class="font-mono text-sm font-bold"
-                        :class="ehHoje(dia) ? 'text-sky-700' : 'text-slate-700'"
+                        :class="ehHoje(dia) ? 'text-acento' : 'text-tinta-2'"
                     >
                         {{ dataCurta(dia) }}
                     </span>
-                    <span class="text-xs text-slate-500 first-letter:uppercase">{{ diaDaSemana(dia) }}</span>
-                    <span v-if="ehHoje(dia)" class="etiqueta bg-sky-100 text-sky-800">hoje</span>
+                    <span class="text-xs text-tinta-3 first-letter:uppercase">{{ diaDaSemana(dia) }}</span>
+                    <span v-if="ehHoje(dia)" class="etiqueta bg-acento-fundo text-acento-tinta">hoje</span>
                 </h2>
 
-                <ul class="cartao divide-y divide-slate-100">
+                <ul class="cartao divide-y divide-borda-sutil">
                     <li v-for="evento in itens" :key="evento.id">
                         <component
                             :is="evento.prazo_id ? 'a' : 'div'"
@@ -181,25 +181,25 @@ const ICONE_TIPO = {
                         >
                             <span class="w-1 shrink-0 rounded-full" :class="BARRA_CRITICIDADE[evento.criticidade]" />
 
-                            <span class="w-12 shrink-0 pt-0.5 font-mono text-xs font-semibold text-slate-600">
+                            <span class="w-12 shrink-0 pt-0.5 font-mono text-xs font-semibold text-tinta-2">
                                 {{ evento.dia_inteiro ? '—' : hora(evento.inicio) }}
                             </span>
 
                             <span class="min-w-0 flex-1">
                                 <span class="flex items-center gap-1.5">
-                                    <Icone :nome="ICONE_TIPO[evento.tipo]" class="h-4 w-4 shrink-0 text-slate-400" />
-                                    <span class="truncate font-medium text-slate-900">{{ evento.titulo }}</span>
+                                    <Icone :nome="ICONE_TIPO[evento.tipo]" class="h-4 w-4 shrink-0 text-tinta-icone" />
+                                    <span class="truncate font-medium text-tinta">{{ evento.titulo }}</span>
                                 </span>
 
-                                <span v-if="evento.descricao" class="mt-0.5 block truncate text-sm text-slate-500">
+                                <span v-if="evento.descricao" class="mt-0.5 block truncate text-sm text-tinta-3">
                                     {{ evento.descricao }}
                                 </span>
 
-                                <span v-if="evento.local" class="mt-0.5 block truncate text-sm text-slate-500">
+                                <span v-if="evento.local" class="mt-0.5 block truncate text-sm text-tinta-3">
                                     {{ evento.local }}
                                 </span>
 
-                                <span v-if="evento.processo" class="mt-1 block truncate text-xs text-slate-400">
+                                <span v-if="evento.processo" class="mt-1 block truncate text-xs text-tinta-3">
                                     {{ evento.processo.rotulo }}
                                     <template v-if="evento.processo.cliente"> · {{ evento.processo.cliente }}</template>
                                 </span>
@@ -210,7 +210,7 @@ const ICONE_TIPO = {
                                 :href="evento.link"
                                 target="_blank"
                                 rel="noopener"
-                                class="shrink-0 self-center text-xs font-semibold text-sky-700"
+                                class="shrink-0 self-center text-xs font-semibold text-acento"
                                 @click.stop
                             >
                                 entrar
@@ -236,13 +236,13 @@ const ICONE_TIPO = {
             <div>
                 <label class="rotulo" for="titulo">Título</label>
                 <input id="titulo" v-model="formulario.titulo" type="text" class="campo" placeholder="Audiência de instrução">
-                <p v-if="formulario.errors.titulo" class="mt-1 text-sm text-red-600">{{ formulario.errors.titulo }}</p>
+                <p v-if="formulario.errors.titulo" class="mt-1 text-sm text-perigo">{{ formulario.errors.titulo }}</p>
             </div>
 
             <div>
                 <label class="rotulo" for="inicio">Quando</label>
                 <input id="inicio" v-model="formulario.inicio" type="datetime-local" class="campo">
-                <p v-if="formulario.errors.inicio" class="mt-1 text-sm text-red-600">{{ formulario.errors.inicio }}</p>
+                <p v-if="formulario.errors.inicio" class="mt-1 text-sm text-perigo">{{ formulario.errors.inicio }}</p>
             </div>
 
             <div>

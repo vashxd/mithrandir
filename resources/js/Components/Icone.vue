@@ -9,7 +9,16 @@ defineProps({
 
 const caminhos = {
     hoje: 'M4 5h16a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Zm0 5h17M8 3v4m8-4v4',
-    agenda: 'M12 7v5l3 2m6-2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z',
+    /*
+     * A agenda é a linha do dia, não um relógio: `relogio` (Prazos) já é o
+     * relógio, e por muito tempo os dois desenhos foram o mesmo — os dois itens
+     * mais usados do trilho apareciam com o mesmo ícone.
+     */
+    agenda: 'M4 4v16M8 7h10M8 12h6M8 17h9',
+    /* Canais de forma da escala de criticidade — ver ICONE_CRITICIDADE. */
+    triangulo: 'M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z',
+    disco: 'M12 5a7 7 0 1 1 0 14 7 7 0 0 1 0-14Z',
+    anel: 'M12 5a7 7 0 1 1 0 14 7 7 0 0 1 0-14Z',
     casos: 'M4 7h16v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7Zm5 0V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M9 12h6',
     mais: 'M4 7h16M4 12h16M4 17h16',
     seta: 'm9 5 7 7-7 7',
@@ -32,13 +41,17 @@ const caminhos = {
     equipe: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm13 10v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8',
     sair: 'M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4m7 14 5-5-5-5m5 5H9',
 };
+
+// Os poucos ícones que são massa, e não traço. Um marcador de estado precisa
+// de peso: contornado, ele desaparece ao lado de um título em semibold.
+const preenchidos = new Set(['triangulo', 'disco']);
 </script>
 
 <template>
     <svg
         viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
+        :fill="preenchidos.has(nome) ? 'currentColor' : 'none'"
+        :stroke="preenchidos.has(nome) ? 'none' : 'currentColor'"
         stroke-width="1.8"
         stroke-linecap="round"
         stroke-linejoin="round"

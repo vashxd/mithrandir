@@ -93,7 +93,7 @@ const DESCRICAO_PAPEL = {
         <template #acoes>
             <button
                 type="button"
-                class="flex h-11 w-11 items-center justify-center rounded-full bg-slate-900 text-white"
+                class="flex h-11 w-11 items-center justify-center rounded-full bg-acao text-sobre-acao"
                 aria-label="Convidar pessoa"
                 @click="folhaConvite = true"
             >
@@ -103,7 +103,7 @@ const DESCRICAO_PAPEL = {
     </Cabecalho>
 
     <div class="pagina space-y-3 px-4 lg:px-8 py-4 pb-8">
-        <p class="rounded-2xl bg-white p-4 text-sm leading-relaxed text-slate-600 ring-1 ring-slate-200">
+        <p class="rounded-2xl bg-superficie p-4 text-sm leading-relaxed text-tinta-2 ring-1 ring-borda">
             Quem você convida entra no <strong>seu</strong> espaço: os casos continuam seus, e
             tudo que a pessoa fizer fica registrado no nome dela.
             <strong>Estagiário não fecha prazo</strong> — ele marca como feito e o prazo
@@ -125,26 +125,26 @@ const DESCRICAO_PAPEL = {
                 <div class="flex items-start gap-3 p-4">
                     <span class="min-w-0 flex-1">
                         <span class="flex flex-wrap items-center gap-2">
-                            <span class="truncate font-semibold text-slate-900">{{ membro.nome }}</span>
+                            <span class="truncate font-semibold text-tinta">{{ membro.nome }}</span>
                             <span
                                 class="etiqueta"
                                 :class="membro.papel === 'advogado'
-                                    ? 'bg-sky-100 text-sky-800'
-                                    : 'bg-slate-100 text-slate-700'"
+                                    ? 'bg-acento-fundo text-acento-tinta'
+                                    : 'bg-superficie-2 text-tinta-2'"
                             >
                                 {{ membro.papel_rotulo }}
                             </span>
-                            <span v-if="!membro.ativo" class="etiqueta bg-slate-200 text-slate-600">
+                            <span v-if="!membro.ativo" class="etiqueta bg-superficie-3 text-tinta-2">
                                 desativado
                             </span>
-                            <span v-else-if="membro.pendente" class="etiqueta bg-amber-100 text-amber-800">
+                            <span v-else-if="membro.pendente" class="etiqueta bg-atencao-fundo text-atencao-tinta">
                                 convite pendente
                             </span>
                         </span>
 
-                        <span class="mt-0.5 block truncate text-sm text-slate-500">{{ membro.email }}</span>
+                        <span class="mt-0.5 block truncate text-sm text-tinta-3">{{ membro.email }}</span>
 
-                        <span class="mt-1 block text-xs text-slate-500">
+                        <span class="mt-1 block text-xs text-tinta-3">
                             <template v-if="membro.acesso_total">Acesso à carteira inteira</template>
                             <template v-else-if="membro.processos.length">
                                 {{ membro.processos.length }}
@@ -159,15 +159,15 @@ const DESCRICAO_PAPEL = {
 
                     <button
                         type="button"
-                        class="shrink-0 rounded-lg bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-700"
+                        class="shrink-0 rounded-lg bg-superficie-2 px-3 py-2 text-xs font-semibold text-tinta-2"
                         @click="abrirAcesso(membro)"
                     >
                         acesso
                     </button>
                 </div>
 
-                <div v-if="membro.link_convite" class="border-t border-slate-100 bg-amber-50 px-4 py-3">
-                    <p class="text-xs leading-relaxed text-amber-900">
+                <div v-if="membro.link_convite" class="border-t border-borda-sutil bg-atencao-fundo px-4 py-3">
+                    <p class="text-xs leading-relaxed text-atencao-tinta">
                         Envie este link para a pessoa. Ela precisa entrar com o e-mail
                         <strong>{{ membro.email }}</strong> para aceitar.
                     </p>
@@ -179,12 +179,12 @@ const DESCRICAO_PAPEL = {
 
                 <ul
                     v-if="!membro.acesso_total && membro.processos.length"
-                    class="border-t border-slate-100 px-4 py-2"
+                    class="border-t border-borda-sutil px-4 py-2"
                 >
                     <li
                         v-for="processo in membro.processos"
                         :key="processo.id"
-                        class="truncate py-1 text-xs text-slate-500"
+                        class="truncate py-1 text-xs text-tinta-3"
                     >
                         {{ processo.rotulo }}
                     </li>
@@ -198,14 +198,14 @@ const DESCRICAO_PAPEL = {
             <div>
                 <label class="rotulo" for="cv-nome">Nome</label>
                 <input id="cv-nome" v-model="convite.nome" type="text" class="campo">
-                <p v-if="convite.errors.nome" class="mt-1 text-sm text-red-600">{{ convite.errors.nome }}</p>
+                <p v-if="convite.errors.nome" class="mt-1 text-sm text-perigo">{{ convite.errors.nome }}</p>
             </div>
 
             <div>
                 <label class="rotulo" for="cv-email">E-mail</label>
                 <input id="cv-email" v-model="convite.email" type="email" class="campo">
-                <p v-if="convite.errors.email" class="mt-1 text-sm text-red-600">{{ convite.errors.email }}</p>
-                <p v-else class="mt-1 text-xs text-slate-500">
+                <p v-if="convite.errors.email" class="mt-1 text-sm text-perigo">{{ convite.errors.email }}</p>
+                <p v-else class="mt-1 text-xs text-tinta-3">
                     A pessoa precisa entrar com este e-mail para aceitar o convite.
                 </p>
             </div>
@@ -215,24 +215,24 @@ const DESCRICAO_PAPEL = {
                 <label
                     v-for="papel in ['estagiario', 'advogado']"
                     :key="papel"
-                    class="mb-2 flex items-start gap-2.5 rounded-2xl bg-white p-4 ring-1"
-                    :class="convite.papel === papel ? 'ring-slate-900' : 'ring-slate-200'"
+                    class="mb-2 flex items-start gap-2.5 rounded-2xl bg-superficie p-4 ring-1"
+                    :class="convite.papel === papel ? 'ring-acao' : 'ring-borda'"
                 >
                     <input v-model="convite.papel" type="radio" :value="papel" class="mt-0.5 h-5 w-5">
                     <span>
-                        <span class="block text-sm font-medium capitalize text-slate-900">{{ papel }}</span>
-                        <span class="block text-xs leading-relaxed text-slate-500">
+                        <span class="block text-sm font-medium capitalize text-tinta">{{ papel }}</span>
+                        <span class="block text-xs leading-relaxed text-tinta-3">
                             {{ DESCRICAO_PAPEL[papel] }}
                         </span>
                     </span>
                 </label>
             </div>
 
-            <label class="flex items-start gap-2.5 rounded-2xl bg-white p-4 ring-1 ring-slate-200">
-                <input v-model="convite.acesso_total" type="checkbox" class="mt-0.5 h-5 w-5 rounded border-slate-300">
+            <label class="flex items-start gap-2.5 rounded-2xl bg-superficie p-4 ring-1 ring-borda">
+                <input v-model="convite.acesso_total" type="checkbox" class="mt-0.5 h-5 w-5 rounded border-borda-forte">
                 <span>
-                    <span class="block text-sm font-medium text-slate-800">Acesso a todos os casos</span>
-                    <span class="block text-xs leading-relaxed text-slate-500">
+                    <span class="block text-sm font-medium text-tinta">Acesso a todos os casos</span>
+                    <span class="block text-xs leading-relaxed text-tinta-3">
                         Sem isto, a pessoa só enxerga os casos que você marcar abaixo — e nada dos
                         outros clientes.
                     </span>
@@ -241,21 +241,21 @@ const DESCRICAO_PAPEL = {
 
             <div v-if="!convite.acesso_total">
                 <span class="rotulo">Casos liberados</span>
-                <p v-if="!processos.length" class="text-sm text-slate-500">
+                <p v-if="!processos.length" class="text-sm text-tinta-3">
                     Você ainda não tem casos cadastrados.
                 </p>
                 <label
                     v-for="processo in processos"
                     :key="processo.id"
-                    class="mb-1.5 flex items-center gap-2.5 rounded-xl bg-white p-3 ring-1 ring-slate-200"
+                    class="mb-1.5 flex items-center gap-2.5 rounded-xl bg-superficie p-3 ring-1 ring-borda"
                 >
                     <input
                         v-model="convite.processos"
                         type="checkbox"
                         :value="processo.id"
-                        class="h-5 w-5 shrink-0 rounded border-slate-300"
+                        class="h-5 w-5 shrink-0 rounded border-borda-forte"
                     >
-                    <span class="min-w-0 truncate text-sm text-slate-800">{{ processo.rotulo }}</span>
+                    <span class="min-w-0 truncate text-sm text-tinta">{{ processo.rotulo }}</span>
                 </label>
             </div>
         </div>
@@ -278,28 +278,28 @@ const DESCRICAO_PAPEL = {
                 <label
                     v-for="papel in ['estagiario', 'advogado']"
                     :key="papel"
-                    class="mb-2 flex items-start gap-2.5 rounded-2xl bg-white p-4 ring-1"
-                    :class="acesso.papel === papel ? 'ring-slate-900' : 'ring-slate-200'"
+                    class="mb-2 flex items-start gap-2.5 rounded-2xl bg-superficie p-4 ring-1"
+                    :class="acesso.papel === papel ? 'ring-acao' : 'ring-borda'"
                 >
                     <input v-model="acesso.papel" type="radio" :value="papel" class="mt-0.5 h-5 w-5">
                     <span>
-                        <span class="block text-sm font-medium capitalize text-slate-900">{{ papel }}</span>
-                        <span class="block text-xs leading-relaxed text-slate-500">
+                        <span class="block text-sm font-medium capitalize text-tinta">{{ papel }}</span>
+                        <span class="block text-xs leading-relaxed text-tinta-3">
                             {{ DESCRICAO_PAPEL[papel] }}
                         </span>
                     </span>
                 </label>
             </div>
 
-            <label class="flex items-center gap-2.5 rounded-2xl bg-white p-4 ring-1 ring-slate-200">
-                <input v-model="acesso.ativo" type="checkbox" class="h-5 w-5 rounded border-slate-300">
-                <span class="text-sm text-slate-800">Acesso ativo</span>
+            <label class="flex items-center gap-2.5 rounded-2xl bg-superficie p-4 ring-1 ring-borda">
+                <input v-model="acesso.ativo" type="checkbox" class="h-5 w-5 rounded border-borda-forte">
+                <span class="text-sm text-tinta">Acesso ativo</span>
             </label>
 
-            <label class="flex items-start gap-2.5 rounded-2xl bg-white p-4 ring-1 ring-slate-200">
-                <input v-model="acesso.acesso_total" type="checkbox" class="mt-0.5 h-5 w-5 rounded border-slate-300">
+            <label class="flex items-start gap-2.5 rounded-2xl bg-superficie p-4 ring-1 ring-borda">
+                <input v-model="acesso.acesso_total" type="checkbox" class="mt-0.5 h-5 w-5 rounded border-borda-forte">
                 <span>
-                    <span class="block text-sm font-medium text-slate-800">Acesso a todos os casos</span>
+                    <span class="block text-sm font-medium text-tinta">Acesso a todos os casos</span>
                 </span>
             </label>
 
@@ -308,22 +308,22 @@ const DESCRICAO_PAPEL = {
                 <label
                     v-for="processo in processos"
                     :key="processo.id"
-                    class="mb-1.5 flex items-center gap-2.5 rounded-xl bg-white p-3 ring-1 ring-slate-200"
+                    class="mb-1.5 flex items-center gap-2.5 rounded-xl bg-superficie p-3 ring-1 ring-borda"
                 >
                     <input
                         v-model="acesso.processos"
                         type="checkbox"
                         :value="processo.id"
-                        class="h-5 w-5 shrink-0 rounded border-slate-300"
+                        class="h-5 w-5 shrink-0 rounded border-borda-forte"
                     >
-                    <span class="min-w-0 truncate text-sm text-slate-800">{{ processo.rotulo }}</span>
+                    <span class="min-w-0 truncate text-sm text-tinta">{{ processo.rotulo }}</span>
                 </label>
             </div>
 
-            <button type="button" class="btn-secundario w-full text-red-600" @click="remover(membroEmEdicao)">
+            <button type="button" class="btn-secundario w-full text-perigo" @click="remover(membroEmEdicao)">
                 Encerrar acesso desta pessoa
             </button>
-            <p class="text-xs leading-relaxed text-slate-400">
+            <p class="text-xs leading-relaxed text-tinta-3">
                 Encerrar o acesso não apaga o que a pessoa fez: o histórico e a auditoria ficam.
             </p>
         </div>

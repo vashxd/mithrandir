@@ -65,35 +65,35 @@ const ROTULO_STATUS = {
         <div class="cartao p-4">
             <dl class="grid grid-cols-2 gap-3 text-sm">
                 <div>
-                    <dt class="text-xs font-medium text-slate-500">Disponibilização</dt>
-                    <dd class="font-mono font-semibold text-slate-900">
+                    <dt class="text-xs font-medium text-tinta-3">Disponibilização</dt>
+                    <dd class="font-mono font-semibold text-tinta">
                         {{ dataCurta(publicacao.data_disponibilizacao) }}
                     </dd>
                 </div>
                 <div>
-                    <dt class="text-xs font-medium text-slate-500">Situação</dt>
-                    <dd class="font-semibold text-slate-900">{{ ROTULO_STATUS[publicacao.status_triagem] }}</dd>
+                    <dt class="text-xs font-medium text-tinta-3">Situação</dt>
+                    <dd class="font-semibold text-tinta">{{ ROTULO_STATUS[publicacao.status_triagem] }}</dd>
                 </div>
                 <div v-if="publicacao.orgao" class="col-span-2">
-                    <dt class="text-xs font-medium text-slate-500">Órgão</dt>
-                    <dd class="text-slate-800">{{ publicacao.orgao }}</dd>
+                    <dt class="text-xs font-medium text-tinta-3">Órgão</dt>
+                    <dd class="text-tinta">{{ publicacao.orgao }}</dd>
                 </div>
                 <div v-if="publicacao.numero_formatado" class="col-span-2">
-                    <dt class="text-xs font-medium text-slate-500">Processo</dt>
-                    <dd class="font-mono text-slate-800">{{ publicacao.numero_formatado }}</dd>
+                    <dt class="text-xs font-medium text-tinta-3">Processo</dt>
+                    <dd class="font-mono text-tinta">{{ publicacao.numero_formatado }}</dd>
                 </div>
                 <div v-if="publicacao.tipo_comunicacao">
-                    <dt class="text-xs font-medium text-slate-500">Tipo</dt>
-                    <dd class="text-slate-800">{{ publicacao.tipo_comunicacao }}</dd>
+                    <dt class="text-xs font-medium text-tinta-3">Tipo</dt>
+                    <dd class="text-tinta">{{ publicacao.tipo_comunicacao }}</dd>
                 </div>
                 <div v-if="publicacao.termo_origem" class="col-span-2">
-                    <dt class="text-xs font-medium text-slate-500">Capturada pela vigilância</dt>
-                    <dd class="text-slate-800">{{ publicacao.termo_origem }}</dd>
+                    <dt class="text-xs font-medium text-tinta-3">Capturada pela vigilância</dt>
+                    <dd class="text-tinta">{{ publicacao.termo_origem }}</dd>
                 </div>
                 <div v-if="publicacao.origem_vigilancia === 'cliente'" class="col-span-2">
-                    <dt class="text-xs font-medium text-slate-500">Origem</dt>
+                    <dt class="text-xs font-medium text-tinta-3">Origem</dt>
                     <dd>
-                        <span class="etiqueta bg-violet-100 text-violet-800">
+                        <span class="etiqueta bg-info-fundo text-info-tinta">
                             nome do cliente: {{ publicacao.cliente_vigiado }}
                         </span>
                     </dd>
@@ -103,7 +103,7 @@ const ROTULO_STATUS = {
             <Link
                 v-if="publicacao.processo"
                 :href="`/casos/${publicacao.processo.id}`"
-                class="mt-3 block rounded-xl bg-slate-50 px-3 py-2.5 text-sm font-medium text-sky-700"
+                class="mt-3 block rounded-xl bg-superficie-2 px-3 py-2.5 text-sm font-medium text-acento"
             >
                 Ver o caso: {{ publicacao.processo.rotulo }}
             </Link>
@@ -111,29 +111,29 @@ const ROTULO_STATUS = {
 
         <div class="cartao p-4">
             <h2 class="mb-2 secao-titulo">Teor completo</h2>
-            <p class="whitespace-pre-wrap text-sm leading-relaxed text-slate-800">{{ publicacao.teor }}</p>
+            <p class="whitespace-pre-wrap text-sm leading-relaxed text-tinta">{{ publicacao.teor }}</p>
         </div>
 
         <div v-if="publicacao.advogados_intimados?.length" class="cartao p-4">
             <h2 class="mb-2 secao-titulo">
                 Advogados intimados
             </h2>
-            <ul class="space-y-1 text-sm text-slate-700">
+            <ul class="space-y-1 text-sm text-tinta-2">
                 <li v-for="(advogado, indice) in publicacao.advogados_intimados" :key="indice">
                     {{ advogado }}
                 </li>
             </ul>
-            <p class="mt-2 text-xs leading-relaxed text-slate-400">
+            <p class="mt-2 text-xs leading-relaxed text-tinta-3">
                 Confira se você está nesta lista. Busca por nome traz homônimo.
             </p>
         </div>
 
         <div v-if="publicacao.destinatarios?.length" class="cartao p-4">
             <h2 class="mb-2 secao-titulo">Destinatários</h2>
-            <ul class="space-y-1 text-sm text-slate-700">
+            <ul class="space-y-1 text-sm text-tinta-2">
                 <li v-for="(destinatario, indice) in publicacao.destinatarios" :key="indice">
                     {{ destinatario.nome ?? destinatario.advogado_nome ?? JSON.stringify(destinatario) }}
-                    <span v-if="destinatario.numero_oab" class="text-slate-500">
+                    <span v-if="destinatario.numero_oab" class="text-tinta-3">
                         (OAB {{ destinatario.numero_oab }}{{ destinatario.uf_oab ? '/' + destinatario.uf_oab : '' }})
                     </span>
                 </li>
@@ -152,7 +152,7 @@ const ROTULO_STATUS = {
                     Descartar
                 </button>
             </div>
-            <p class="pt-1 text-center text-xs leading-relaxed text-slate-400">
+            <p class="pt-1 text-center text-xs leading-relaxed text-tinta-3">
                 Publicação descartada não é apagada: fica arquivada como prova de que o app a recebeu.
             </p>
         </div>
@@ -169,8 +169,8 @@ const ROTULO_STATUS = {
                     </option>
                 </select>
 
-                <label v-if="publicacao.numero_processo" class="mt-3 flex items-center gap-2.5 text-sm text-slate-700">
-                    <input v-model="formulario.criar_processo" type="checkbox" class="h-5 w-5 rounded border-slate-300">
+                <label v-if="publicacao.numero_processo" class="mt-3 flex items-center gap-2.5 text-sm text-tinta-2">
+                    <input v-model="formulario.criar_processo" type="checkbox" class="h-5 w-5 rounded border-borda-forte">
                     Ou criar um caso novo com o número desta publicação
                 </label>
             </div>
@@ -204,16 +204,16 @@ const ROTULO_STATUS = {
                 </div>
             </div>
 
-            <label class="flex items-start gap-2.5 rounded-2xl bg-white p-4 ring-1 ring-slate-200">
+            <label class="flex items-start gap-2.5 rounded-2xl bg-superficie p-4 ring-1 ring-borda">
                 <input
                     type="checkbox"
-                    class="mt-0.5 h-5 w-5 rounded border-slate-300"
+                    class="mt-0.5 h-5 w-5 rounded border-borda-forte"
                     :checked="formulario.multiplicador === 2"
                     @change="formulario.multiplicador = $event.target.checked ? 2 : 1"
                 >
                 <span>
-                    <span class="block text-sm font-medium text-slate-800">Prazo em dobro</span>
-                    <span class="block text-xs text-slate-500">Confirmação humana, nunca automático.</span>
+                    <span class="block text-sm font-medium text-tinta">Prazo em dobro</span>
+                    <span class="block text-xs text-tinta-3">Confirmação humana, nunca automático.</span>
                 </span>
             </label>
         </div>

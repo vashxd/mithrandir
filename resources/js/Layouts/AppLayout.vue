@@ -2,6 +2,7 @@
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { Link, router, usePage } from '@inertiajs/vue3';
 import { observarConexao, replay, enviarAnexos, anexosPendentes, pendentes } from '../offline';
+import { avisoVarredura, varrerPeloCliente } from '../varreduraCliente';
 import Icone from '../Components/Icone.vue';
 
 const pagina = usePage();
@@ -11,7 +12,53 @@ const flash = computed(() => pagina.props.flash ?? {});
 const caminho = computed(() => pagina.url.split('?')[0]);
 const usuario = computed(() => pagina.props.auth?.user ?? null);
 
+const radar = computed(() => pagina.props.radar ?? null);
 const contexto = computed(() => pagina.props.contexto ?? {});
+
+/**
+ * Defasagem do radar, sempre a vista.
+ *
+ * Quando a varredura depende do navegador (o DJEN recusa IP estrangeiro), a
+ * inbox vazia e ambigua: pode ser "nao ha publicacao nova" ou "ninguem abriu
+ * o app para ir buscar". Este aviso desfaz a ambiguidade. Sem ele, a tela
+ * promete uma cobertura que nao existe.
+ *
+ * O corte e em horas porque a varredura do servidor roda as 6h: em dias, uma
+ * varredura saudavel acenderia o aviso toda madrugada.
+ */
+const avisoRadar = computed(() => {
+    const estado = radar.value;
+
+    if (!estado?.tem_termos) {
+        return null;
+    }
+
+    if (estado.cego) {
+        return {
+            tom: 'perigo',
+            texto: 'Radar cego — a varredura do DJEN falhou seguidas vezes. Confira o diário manualmente.',
+        };
+    }
+
+    if (estado.horas_sem_varredura === null) {
+        return { tom: 'perigo', texto: 'O DJEN ainda não foi varrido nesta conta. Confira o diário manualmente.' };
+    }
+
+    const horas = estado.horas_sem_varredura;
+
+    if (horas >= 72) {
+        return {
+            tom: 'perigo',
+            texto: `Sem varredura do DJEN há ${Math.floor(horas / 24)} dias. Confira o diário manualmente.`,
+        };
+    }
+
+    if (horas >= 30) {
+        return { tom: 'atencao', texto: `Última varredura do DJEN há ${horas} h.` };
+    }
+
+    return null;
+});
 const espacos = computed(() => pagina.props.espacos ?? []);
 const podeTrocarEspaco = computed(() => espacos.value.length > 1);
 
@@ -58,12 +105,34 @@ onMounted(async () => {
         await Promise.allSettled([replay(), enviarAnexos()]);
         await contarFila();
     }
+
+    await varrerAoAbrir();
 });
+
+/**
+ * Varredura oportunista a cada abertura do app.
+ *
+ * Silenciosa de proposito: nao interrompe quem acabou de abrir a tela. O
+ * servidor e quem decide se ja passou o intervalo minimo, entao abrir dez
+ * vezes na mesma hora nao castiga a API do CNJ.
+ */
+async function varrerAoAbrir() {
+    const { executou } = await varrerPeloCliente();
+
+    // Recarrega mesmo sem publicacao nova: a varredura acabou de mexer no
+    // relogio do radar, e a faixa de defasagem no topo ficaria mentindo.
+    if (executou) {
+        router.reload({ only: ['badges', 'radar'] });
+    }
+}
 
 onUnmounted(() => pararDeObservar?.());
 
-// Trocar de tela fecha qualquer painel aberto.
-watch(caminho, fecharTudo);
+// Trocar de tela fecha qualquer painel aberto e descarta o aviso da varredura.
+watch(caminho, () => {
+    fecharTudo();
+    avisoVarredura.value = null;
+});
 
 function estaEm(prefixo) {
     return prefixo === '/' ? caminho.value === '/' : caminho.value.startsWith(prefixo);
@@ -220,51 +289,51 @@ const iniciais = computed(() =>
 <template>
     <div class="min-h-screen bg-fundo">
         <!-- ==================== Trilho lateral (desktop) ==================== -->
-        <aside class="fixed inset-y-0 left-0 z-40 hidden w-68 flex-col border-r border-slate-200 bg-white lg:flex">
+        <aside class="fixed inset-y-0 left-0 z-40 hidden w-[var(--largura-trilho)] flex-col border-r border-borda bg-superficie lg:flex">
             <div class="flex items-center gap-2.5 px-5 py-5">
                 <img src="/icons/icon.svg" alt="" class="h-8 w-8 rounded-lg">
-                <span class="text-[15px] font-semibold tracking-tight text-slate-900">Mithrandir</span>
+                <span class="text-[15px] font-semibold tracking-tight text-tinta">Mithrandir</span>
             </div>
 
             <!-- Espaco de trabalho ativo. So aparece para quem tem mais de um. -->
             <div v-if="podeTrocarEspaco" class="relative px-3 pb-3">
                 <button
                     type="button"
-                    class="flex w-full items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-left transition hover:border-slate-300 hover:bg-slate-50"
+                    class="flex w-full items-center gap-2 rounded-lg border border-borda px-3 py-2 text-left transition hover:border-borda-forte hover:bg-superficie-2"
                     @click="espacosAbertos = !espacosAbertos"
                 >
                     <span class="min-w-0 flex-1">
-                        <span class="block text-[11px] font-medium uppercase tracking-wide text-slate-400">Espaço</span>
-                        <span class="block truncate text-sm font-medium text-slate-900">{{ espacoAtual }}</span>
+                        <span class="block text-[11px] font-medium uppercase tracking-wide text-tinta-3">Espaço</span>
+                        <span class="block truncate text-sm font-medium text-tinta">{{ espacoAtual }}</span>
                     </span>
                     <Icone
                         nome="seta"
-                        class="h-4 w-4 shrink-0 text-slate-400 transition"
+                        class="h-4 w-4 shrink-0 text-tinta-icone transition"
                         :class="espacosAbertos ? 'rotate-90' : 'rotate-0'"
                     />
                 </button>
 
                 <div
                     v-if="espacosAbertos"
-                    class="absolute inset-x-3 top-full z-50 mt-1 overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg"
+                    class="absolute inset-x-3 top-full z-50 mt-1 overflow-hidden rounded-xl border border-borda bg-superficie py-1 shadow-lg"
                 >
                     <button
                         v-for="espaco in espacos"
                         :key="espaco.advogado_id"
                         type="button"
-                        class="flex w-full items-center justify-between gap-2 px-3 py-2 text-left transition hover:bg-slate-50"
+                        class="flex w-full items-center justify-between gap-2 px-3 py-2 text-left transition hover:bg-superficie-2"
                         @click="trocarEspaco(espaco.advogado_id)"
                     >
                         <span class="min-w-0">
-                            <span class="block truncate text-sm font-medium text-slate-900">
+                            <span class="block truncate text-sm font-medium text-tinta">
                                 {{ espaco.proprio ? 'Meu espaço' : espaco.nome }}
                             </span>
-                            <span class="block text-xs capitalize text-slate-500">{{ espaco.papel }}</span>
+                            <span class="block text-xs capitalize text-tinta-3">{{ espaco.papel }}</span>
                         </span>
                         <Icone
                             v-if="espaco.advogado_id === contexto.advogado_id"
                             nome="check"
-                            class="h-4 w-4 shrink-0 text-emerald-600"
+                            class="h-4 w-4 shrink-0 text-ok"
                         />
                     </button>
                 </div>
@@ -284,23 +353,23 @@ const iniciais = computed(() =>
                         :href="item.href"
                         class="group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition"
                         :class="estaEm(item.href)
-                            ? 'bg-slate-100 font-semibold text-slate-900'
-                            : 'font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900'"
+                            ? 'bg-superficie-2 font-semibold text-tinta'
+                            : 'font-medium text-tinta-2 hover:bg-superficie-2 hover:text-tinta'"
                     >
                         <span
-                            class="absolute inset-y-1.5 left-0 w-0.5 rounded-full bg-slate-900 transition"
+                            class="absolute inset-y-1.5 left-0 w-0.5 rounded-full bg-acao transition"
                             :class="estaEm(item.href) ? 'opacity-100' : 'opacity-0'"
                         />
                         <Icone
                             :nome="item.icone"
                             class="h-[18px] w-[18px] shrink-0"
-                            :class="estaEm(item.href) ? 'text-slate-900' : 'text-slate-400 group-hover:text-slate-600'"
+                            :class="estaEm(item.href) ? 'text-tinta' : 'text-tinta-3 group-hover:text-tinta-2'"
                         />
                         <span class="min-w-0 flex-1 truncate">{{ item.rotulo }}</span>
                         <span
                             v-if="item.badge"
                             class="shrink-0 rounded-full px-1.5 py-0.5 text-[11px] font-semibold tabular-nums"
-                            :class="estaEm(item.href) ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-700'"
+                            :class="estaEm(item.href) ? 'bg-acao text-sobre-acao' : 'bg-superficie-3 text-tinta-2'"
                         >
                             {{ item.badge > 99 ? '99+' : item.badge }}
                         </span>
@@ -308,18 +377,18 @@ const iniciais = computed(() =>
                 </div>
             </nav>
 
-            <div class="border-t border-slate-200 p-3">
+            <div class="border-t border-borda p-3">
                 <div class="flex items-center gap-2.5 rounded-lg px-2 py-1.5">
-                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-900 text-xs font-semibold text-white">
+                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-acao text-xs font-semibold text-sobre-acao">
                         {{ iniciais || '—' }}
                     </span>
                     <span class="min-w-0 flex-1">
-                        <span class="block truncate text-sm font-medium text-slate-900">{{ usuario?.nome ?? 'Conta' }}</span>
-                        <span v-if="usuario?.oab" class="block truncate text-xs text-slate-500">{{ usuario.oab }}</span>
+                        <span class="block truncate text-sm font-medium text-tinta">{{ usuario?.nome ?? 'Conta' }}</span>
+                        <span v-if="usuario?.oab" class="block truncate text-xs text-tinta-3">{{ usuario.oab }}</span>
                     </span>
                     <button
                         type="button"
-                        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-400 transition hover:bg-red-50 hover:text-red-600"
+                        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-tinta-3 transition hover:bg-perigo-fundo hover:text-perigo"
                         title="Sair"
                         aria-label="Sair"
                         @click="sair"
@@ -331,28 +400,37 @@ const iniciais = computed(() =>
         </aside>
 
         <!-- ==================== Coluna de conteudo ==================== -->
-        <div class="flex min-h-screen flex-col lg:pl-68">
+        <div class="flex min-h-screen flex-col lg:pl-[var(--largura-trilho)]">
             <!-- Faixa de estado: offline e fila pendente nunca ficam escondidos. -->
-            <div v-if="!conectado || naFila > 0 || atualizacaoDisponivel" class="sticky top-0 z-30">
-                <div v-if="!conectado" class="bg-slate-800 px-4 py-2 text-center text-sm text-white">
+            <div v-if="!conectado || naFila > 0 || atualizacaoDisponivel || avisoRadar" class="sticky top-0 z-30">
+                <div v-if="!conectado" class="bg-neutro-solido px-4 py-2 text-center text-sm text-white">
                     Sem conexão — você continua trabalhando; tudo sobe depois.
                 </div>
-                <div v-else-if="naFila > 0" class="bg-sky-700 px-4 py-2 text-center text-sm text-white">
+                <div v-else-if="naFila > 0" class="bg-acento-solido px-4 py-2 text-center text-sm text-white">
                     {{ naFila }} {{ naFila === 1 ? 'item aguardando envio' : 'itens aguardando envio' }}
                 </div>
                 <button
                     v-if="atualizacaoDisponivel"
-                    class="w-full bg-emerald-700 px-4 py-2 text-center text-sm font-medium text-white"
+                    class="w-full bg-ok-solido px-4 py-2 text-center text-sm font-medium text-white"
                     @click="recarregar"
                 >
                     Nova versão disponível — tocar para atualizar
                 </button>
+
+                <Link
+                    v-if="avisoRadar"
+                    href="/configuracoes/radar"
+                    class="block px-4 py-2 text-center text-sm font-medium text-white"
+                    :class="avisoRadar.tom === 'perigo' ? 'bg-perigo-solido' : 'bg-atencao-solido'"
+                >
+                    {{ avisoRadar.texto }}
+                </Link>
             </div>
 
             <!-- Trabalhando no espaco de outra pessoa: nunca escondido. -->
             <div
                 v-if="contexto.advogado_id && !contexto.eh_titular"
-                class="sticky top-0 z-30 flex items-center justify-between gap-2 bg-violet-700 px-4 py-2 text-sm text-white"
+                class="sticky top-0 z-30 flex items-center justify-between gap-2 bg-info-solido px-4 py-2 text-sm text-white"
             >
                 <span class="min-w-0 truncate">
                     Você está em <strong>{{ contexto.advogado_nome }}</strong>
@@ -360,7 +438,7 @@ const iniciais = computed(() =>
                 </span>
                 <button
                     type="button"
-                    class="shrink-0 rounded-lg bg-white/20 px-2.5 py-1 text-xs font-semibold transition hover:bg-white/30"
+                    class="shrink-0 rounded-lg bg-superficie/20 px-2.5 py-1 text-xs font-semibold transition hover:bg-superficie/30"
                     @click="abrirTrocaDeEspaco"
                 >
                     trocar
@@ -368,14 +446,14 @@ const iniciais = computed(() =>
             </div>
 
             <main class="flex-1 pb-28 lg:pb-12">
-                <div v-if="flash.sucesso || flash.erro" class="pagina px-4 pt-4 lg:px-8">
-                        <p
-                            class="rounded-xl px-4 py-3 text-sm font-medium"
-                            :class="flash.erro
-                                ? 'bg-red-50 text-red-800 ring-1 ring-red-200'
-                                : 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200'"
-                        >
-                            {{ flash.erro || flash.sucesso }}
+                <div v-if="flash.sucesso || flash.erro || avisoVarredura" class="pagina px-4 pt-4 lg:px-8">
+                    <p
+                        class="rounded-xl px-4 py-3 text-sm font-medium"
+                        :class="flash.erro || avisoVarredura?.tom === 'erro'
+                            ? 'bg-perigo-fundo text-perigo-tinta ring-1 ring-perigo-borda'
+                            : 'bg-ok-fundo text-ok-tinta ring-1 ring-ok-borda'"
+                    >
+                        {{ flash.erro || flash.sucesso || avisoVarredura?.texto }}
                     </p>
                 </div>
 
@@ -390,7 +468,7 @@ const iniciais = computed(() =>
             leave-active-class="transition duration-150"
             leave-to-class="opacity-0"
         >
-            <div v-if="menuAberto" class="fixed inset-0 z-40 bg-slate-900/40 lg:hidden" @click="fecharTudo" />
+            <div v-if="menuAberto" class="fixed inset-0 z-40 bg-veu/45 lg:hidden" @click="fecharTudo" />
         </Transition>
 
         <Transition
@@ -401,29 +479,29 @@ const iniciais = computed(() =>
         >
             <div
                 v-if="menuAberto"
-                class="fixed inset-x-0 bottom-0 z-50 max-h-[85vh] overflow-y-auto rounded-t-3xl bg-white pb-safe shadow-2xl lg:hidden"
+                class="fixed inset-x-0 bottom-0 z-50 max-h-[85vh] overflow-y-auto rounded-t-3xl bg-superficie pb-safe shadow-2xl lg:hidden"
             >
-                <div class="mx-auto mt-3 h-1.5 w-10 rounded-full bg-slate-300" />
+                <div class="mx-auto mt-3 h-1.5 w-10 rounded-full bg-superficie-3" />
                 <nav class="p-3">
-                    <div v-if="podeTrocarEspaco" class="mb-2 border-b border-slate-200 pb-2">
+                    <div v-if="podeTrocarEspaco" class="mb-2 border-b border-borda pb-2">
                         <p class="secao-titulo px-4 pb-1">Espaço de trabalho</p>
                         <button
                             v-for="espaco in espacos"
                             :key="espaco.advogado_id"
                             type="button"
-                            class="flex w-full items-center justify-between rounded-xl px-4 py-3 text-left active:bg-slate-100"
+                            class="flex w-full items-center justify-between rounded-xl px-4 py-3 text-left active:bg-superficie-2"
                             @click="trocarEspaco(espaco.advogado_id)"
                         >
                             <span class="min-w-0">
-                                <span class="block truncate font-medium text-slate-900">
+                                <span class="block truncate font-medium text-tinta">
                                     {{ espaco.proprio ? 'Meu espaço' : espaco.nome }}
                                 </span>
-                                <span class="block text-xs capitalize text-slate-500">{{ espaco.papel }}</span>
+                                <span class="block text-xs capitalize text-tinta-3">{{ espaco.papel }}</span>
                             </span>
                             <Icone
                                 v-if="espaco.advogado_id === contexto.advogado_id"
                                 nome="check"
-                                class="h-5 w-5 shrink-0 text-emerald-600"
+                                class="h-5 w-5 shrink-0 text-ok"
                             />
                         </button>
                     </div>
@@ -432,25 +510,25 @@ const iniciais = computed(() =>
                         v-for="item in itensDoMenu"
                         :key="item.href"
                         :href="item.href"
-                        class="flex items-center gap-3 rounded-xl px-4 py-3.5 active:bg-slate-100"
+                        class="flex items-center gap-3 rounded-xl px-4 py-3.5 active:bg-superficie-2"
                         @click="fecharTudo"
                     >
-                        <Icone :nome="item.icone" class="h-5 w-5 shrink-0 text-slate-400" />
+                        <Icone :nome="item.icone" class="h-5 w-5 shrink-0 text-tinta-icone" />
                         <span class="min-w-0 flex-1">
-                            <span class="block font-semibold text-slate-900">{{ item.rotulo }}</span>
-                            <span class="block text-sm text-slate-500">{{ item.descricao }}</span>
+                            <span class="block font-semibold text-tinta">{{ item.rotulo }}</span>
+                            <span class="block text-sm text-tinta-3">{{ item.descricao }}</span>
                         </span>
                         <span
                             v-if="item.badge"
-                            class="shrink-0 rounded-full bg-slate-200 px-1.5 py-0.5 text-[11px] font-semibold tabular-nums text-slate-700"
+                            class="shrink-0 rounded-full bg-superficie-3 px-1.5 py-0.5 text-[11px] font-semibold tabular-nums text-tinta-2"
                         >
                             {{ item.badge > 99 ? '99+' : item.badge }}
                         </span>
-                        <Icone nome="seta" class="h-5 w-5 shrink-0 text-slate-400" />
+                        <Icone nome="seta" class="h-5 w-5 shrink-0 text-tinta-icone" />
                     </Link>
 
-                    <form class="mt-2 border-t border-slate-200 pt-2" @submit.prevent="sair">
-                        <button type="submit" class="w-full rounded-xl px-4 py-3.5 text-left font-semibold text-red-600 active:bg-red-50">
+                    <form class="mt-2 border-t border-borda pt-2" @submit.prevent="sair">
+                        <button type="submit" class="w-full rounded-xl px-4 py-3.5 text-left font-semibold text-perigo active:bg-perigo-fundo">
                             Sair
                         </button>
                     </form>
@@ -459,21 +537,21 @@ const iniciais = computed(() =>
         </Transition>
 
         <!-- ==================== Abas inferiores (celular) ==================== -->
-        <nav class="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white/95 pb-safe backdrop-blur lg:hidden">
+        <nav class="fixed inset-x-0 bottom-0 z-50 border-t border-borda bg-superficie/95 pb-safe backdrop-blur lg:hidden">
             <div class="mx-auto flex max-w-2xl">
                 <Link
                     v-for="aba in abas"
                     :key="aba.rotulo"
                     :href="aba.href"
                     class="relative flex flex-1 flex-col items-center gap-0.5 py-2.5 text-xs font-medium"
-                    :class="aba.ativo ? 'text-sky-700' : 'text-slate-500'"
+                    :class="aba.ativo ? 'text-acento' : 'text-tinta-3'"
                     @click="aoTocarAba(aba, $event)"
                 >
                     <span class="relative">
                         <Icone :nome="aba.icone" class="h-6 w-6" />
                         <span
                             v-if="aba.badge"
-                            class="absolute -right-2 -top-1 min-w-4 rounded-full bg-red-600 px-1 text-[10px] font-bold leading-4 text-white"
+                            class="absolute -right-2 -top-1 min-w-4 rounded-full bg-perigo-solido px-1 text-[10px] font-bold leading-4 text-white"
                         >
                             {{ aba.badge > 99 ? '99+' : aba.badge }}
                         </span>

@@ -6,6 +6,7 @@ import Cabecalho from '../../Components/Cabecalho.vue';
 import Folha from '../../Components/Folha.vue';
 import Icone from '../../Components/Icone.vue';
 import Vazio from '../../Components/Vazio.vue';
+import { sincronizarAgora } from '../../varreduraCliente';
 
 /**
  * Tela 2 — "O que o Judiciário me mandou?"
@@ -30,12 +31,14 @@ const abas = computed(() => [
 
 const sincronizando = ref(false);
 
-function sincronizar() {
+async function sincronizar() {
     sincronizando.value = true;
-    router.post('/publicacoes/sincronizar', {}, {
-        preserveScroll: true,
-        onFinish: () => (sincronizando.value = false),
-    });
+
+    try {
+        await sincronizarAgora();
+    } finally {
+        sincronizando.value = false;
+    }
 }
 
 function trocarAba(chave) {
@@ -146,7 +149,7 @@ function enviarTriagem() {
         <template #acoes>
             <button
                 type="button"
-                class="flex h-11 w-11 items-center justify-center rounded-full text-slate-600 active:bg-slate-100 disabled:opacity-40"
+                class="flex h-11 w-11 items-center justify-center rounded-full text-tinta-2 active:bg-superficie-2 disabled:opacity-40"
                 :disabled="sincronizando"
                 aria-label="Sincronizar agora"
                 @click="sincronizar"
@@ -164,8 +167,8 @@ function enviarTriagem() {
                 type="button"
                 class="shrink-0 rounded-full px-3.5 py-2 text-sm font-medium transition"
                 :class="status === aba.chave
-                    ? 'bg-slate-900 text-white'
-                    : 'bg-white text-slate-600 ring-1 ring-slate-200'"
+                    ? 'bg-acao text-sobre-acao'
+                    : 'bg-superficie text-tinta-2 ring-1 ring-borda'"
                 @click="trocarAba(aba.chave)"
             >
                 {{ aba.rotulo }}
@@ -173,7 +176,7 @@ function enviarTriagem() {
             </button>
         </div>
 
-        <p v-if="status === 'nova' && publicacoes.data.length" class="px-4 pb-2 text-xs text-slate-500 lg:hidden">
+        <p v-if="status === 'nova' && publicacoes.data.length" class="px-4 pb-2 text-xs text-tinta-3 lg:hidden">
             Arraste para a direita para virar prazo, para a esquerda para dar ciência.
         </p>
 
@@ -188,9 +191,9 @@ function enviarTriagem() {
         <ul v-else class="space-y-2 px-4 pb-8 lg:grid lg:grid-cols-2 lg:items-start lg:gap-3 lg:space-y-0 xl:grid-cols-3">
             <li v-for="publicacao in publicacoes.data" :key="publicacao.id" class="relative overflow-hidden rounded-2xl">
                 <!-- Pistas do gesto, reveladas conforme o cartão sai do lugar. -->
-                <div class="absolute inset-0 flex items-center justify-between bg-slate-100 px-5 text-sm font-semibold">
-                    <span class="text-emerald-700">virar prazo</span>
-                    <span class="text-slate-600">ciência</span>
+                <div class="absolute inset-0 flex items-center justify-between bg-superficie-2 px-5 text-sm font-semibold">
+                    <span class="text-ok">virar prazo</span>
+                    <span class="text-tinta-2">ciência</span>
                 </div>
 
                 <div
@@ -202,23 +205,23 @@ function enviarTriagem() {
                 >
                     <Link :href="`/publicacoes/${publicacao.id}`" class="block p-4">
                         <div class="flex items-baseline justify-between gap-3">
-                            <span class="truncate text-sm font-semibold text-slate-800">
+                            <span class="truncate text-sm font-semibold text-tinta">
                                 {{ publicacao.tribunal ?? 'DJEN' }}
                             </span>
-                            <span class="shrink-0 font-mono text-xs text-slate-500">
+                            <span class="shrink-0 font-mono text-xs text-tinta-3">
                                 {{ dataCurta(publicacao.data_disponibilizacao) }}
                             </span>
                         </div>
 
-                        <p v-if="publicacao.orgao" class="truncate text-xs text-slate-500">
+                        <p v-if="publicacao.orgao" class="truncate text-xs text-tinta-3">
                             {{ publicacao.orgao }}
                         </p>
 
-                        <p v-if="publicacao.numero_formatado" class="mt-1 font-mono text-xs text-slate-600">
+                        <p v-if="publicacao.numero_formatado" class="mt-1 font-mono text-xs text-tinta-2">
                             {{ publicacao.numero_formatado }}
                         </p>
 
-                        <p class="mt-2 line-clamp-3 text-sm leading-relaxed text-slate-600">
+                        <p class="mt-2 line-clamp-3 text-sm leading-relaxed text-tinta-2">
                             {{ publicacao.resumo }}
                         </p>
 
@@ -226,30 +229,30 @@ function enviarTriagem() {
                             <!-- De quem e esta publicacao: sua OAB ou o nome de um cliente. -->
                             <span
                                 v-if="publicacao.origem_vigilancia === 'cliente'"
-                                class="etiqueta bg-violet-100 text-violet-800"
+                                class="etiqueta bg-info-fundo text-info-tinta"
                             >
                                 cliente: {{ publicacao.cliente_vigiado }}
                             </span>
-                            <span v-else class="etiqueta bg-slate-100 text-slate-600">
+                            <span v-else class="etiqueta bg-superficie-2 text-tinta-2">
                                 sua OAB
                             </span>
 
                             <span
                                 v-if="publicacao.processo"
-                                class="etiqueta bg-slate-100 text-slate-700"
+                                class="etiqueta bg-superficie-2 text-tinta-2"
                             >
                                 {{ publicacao.processo.cliente ?? publicacao.processo.rotulo }}
                             </span>
                             <span
                                 v-else-if="publicacao.numero_processo"
-                                class="etiqueta bg-amber-100 text-amber-900"
+                                class="etiqueta bg-atencao-fundo text-atencao-tinta"
                             >
                                 caso não cadastrado
                             </span>
                         </div>
                     </Link>
 
-                    <div v-if="publicacao.status_triagem === 'nova'" class="flex gap-2 border-t border-slate-100 p-3">
+                    <div v-if="publicacao.status_triagem === 'nova'" class="flex gap-2 border-t border-borda-sutil p-3">
                         <button type="button" class="btn-primario flex-1" @click="abrirTriagem(publicacao, 'prazo')">
                             Virar prazo
                         </button>
@@ -258,7 +261,7 @@ function enviarTriagem() {
                         </button>
                         <button
                             type="button"
-                            class="btn-secundario px-3 text-slate-500"
+                            class="btn-secundario px-3 text-tinta-3"
                             aria-label="Descartar"
                             @click="decidir(publicacao, 'descartada')"
                         >
@@ -276,7 +279,7 @@ function enviarTriagem() {
                 :href="link.url ?? '#'"
                 class="min-w-11 rounded-lg px-3 py-2 text-center text-sm"
                 :class="[
-                    link.active ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 ring-1 ring-slate-200',
+                    link.active ? 'bg-acao text-sobre-acao' : 'bg-superficie text-tinta-2 ring-1 ring-borda',
                     !link.url ? 'pointer-events-none opacity-40' : '',
                 ]"
                 v-html="link.label"
@@ -288,23 +291,23 @@ function enviarTriagem() {
     <Folha :aberta="folhaAberta" titulo="Virar prazo" @fechar="folhaAberta = false">
         <div v-if="publicacaoAtual" class="space-y-4">
             <div class="cartao p-4">
-                <p class="text-xs font-medium text-slate-500">
+                <p class="text-xs font-medium text-tinta-3">
                     Disponibilizada em {{ dataCurta(publicacaoAtual.data_disponibilizacao) }}
                     · {{ publicacaoAtual.tribunal }}
                 </p>
-                <p class="mt-2 line-clamp-4 text-sm leading-relaxed text-slate-700">
+                <p class="mt-2 line-clamp-4 text-sm leading-relaxed text-tinta-2">
                     {{ publicacaoAtual.resumo }}
                 </p>
-                <Link :href="`/publicacoes/${publicacaoAtual.id}`" class="mt-2 inline-block text-sm font-medium text-sky-700">
+                <Link :href="`/publicacoes/${publicacaoAtual.id}`" class="mt-2 inline-block text-sm font-medium text-acento">
                     ler o teor completo
                 </Link>
             </div>
 
-            <div v-if="!publicacaoAtual.processo && publicacaoAtual.numero_processo" class="rounded-2xl border border-amber-200 bg-amber-50 p-4">
-                <p class="text-sm font-semibold text-amber-900">Caso não cadastrado</p>
-                <p class="mt-1 font-mono text-xs text-amber-800">{{ publicacaoAtual.numero_formatado }}</p>
-                <label class="mt-3 flex items-center gap-2.5 text-sm text-amber-900">
-                    <input v-model="formulario.criar_processo" type="checkbox" class="h-5 w-5 rounded border-amber-300">
+            <div v-if="!publicacaoAtual.processo && publicacaoAtual.numero_processo" class="rounded-2xl border border-atencao-borda bg-atencao-fundo p-4">
+                <p class="text-sm font-semibold text-atencao-tinta">Caso não cadastrado</p>
+                <p class="mt-1 font-mono text-xs text-atencao-tinta">{{ publicacaoAtual.numero_formatado }}</p>
+                <label class="mt-3 flex items-center gap-2.5 text-sm text-atencao-tinta">
+                    <input v-model="formulario.criar_processo" type="checkbox" class="h-5 w-5 rounded border-atencao-borda">
                     Criar o caso automaticamente com estes dados
                 </label>
             </div>
@@ -327,7 +330,7 @@ function enviarTriagem() {
             <div>
                 <label class="rotulo" for="rotulo-prazo">Como chamar este prazo</label>
                 <input id="rotulo-prazo" v-model="formulario.tipo" type="text" class="campo" placeholder="Contestação">
-                <p v-if="formulario.errors.tipo" class="mt-1 text-sm text-red-600">{{ formulario.errors.tipo }}</p>
+                <p v-if="formulario.errors.tipo" class="mt-1 text-sm text-perigo">{{ formulario.errors.tipo }}</p>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
@@ -344,17 +347,17 @@ function enviarTriagem() {
                 </div>
             </div>
 
-            <div class="rounded-2xl bg-white p-4 ring-1 ring-slate-200">
+            <div class="rounded-2xl bg-superficie p-4 ring-1 ring-borda">
                 <label class="flex items-start gap-2.5">
                     <input
                         type="checkbox"
-                        class="mt-0.5 h-5 w-5 rounded border-slate-300"
+                        class="mt-0.5 h-5 w-5 rounded border-borda-forte"
                         :checked="formulario.multiplicador === 2"
                         @change="formulario.multiplicador = $event.target.checked ? 2 : 1"
                     >
                     <span>
-                        <span class="block text-sm font-medium text-slate-800">Prazo em dobro</span>
-                        <span class="block text-xs leading-relaxed text-slate-500">
+                        <span class="block text-sm font-medium text-tinta">Prazo em dobro</span>
+                        <span class="block text-xs leading-relaxed text-tinta-3">
                             Fazenda Pública, Defensoria ou Ministério Público (CPC arts. 180, 183, 186).
                             Nunca aplicado automaticamente — a confirmação é sua.
                         </span>

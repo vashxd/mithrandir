@@ -68,8 +68,8 @@ function enviar() {
                 placeholder="0000000-00.0000.0.00.0000"
                 @input="aoDigitarNumero"
             >
-            <p v-if="formulario.errors.numero_cnj" class="mt-1 text-sm text-red-600">{{ formulario.errors.numero_cnj }}</p>
-            <p v-else class="mt-1 text-xs text-slate-500">O dígito verificador é conferido ao salvar.</p>
+            <p v-if="formulario.errors.numero_cnj" class="mt-1 text-sm text-perigo">{{ formulario.errors.numero_cnj }}</p>
+            <p v-else class="mt-1 text-xs text-tinta-3">O dígito verificador é conferido ao salvar.</p>
         </div>
 
         <div>
@@ -133,9 +133,9 @@ function enviar() {
             <textarea id="acao" v-model="formulario.proxima_acao" rows="3" class="campo" placeholder="O que você precisa lembrar sobre este caso" />
         </div>
 
-        <label class="flex items-center gap-2.5 rounded-2xl bg-white p-4 ring-1 ring-slate-200">
-            <input v-model="formulario.segredo_justica" type="checkbox" class="h-5 w-5 rounded border-slate-300">
-            <span class="text-sm text-slate-800">Corre em segredo de justiça</span>
+        <label class="flex items-center gap-2.5 rounded-2xl bg-superficie p-4 ring-1 ring-borda">
+            <input v-model="formulario.segredo_justica" type="checkbox" class="h-5 w-5 rounded border-borda-forte">
+            <span class="text-sm text-tinta">Corre em segredo de justiça</span>
         </label>
 
         <button type="submit" class="btn-primario w-full" :disabled="formulario.processing">

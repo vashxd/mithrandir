@@ -1,9 +1,13 @@
 <script setup>
 import { computed } from 'vue';
-import { Head, Link, router, usePage } from '@inertiajs/vue3';
-import { moeda, dataCurta, dataLonga, hora, contagem, CORES_CRITICIDADE, BARRA_CRITICIDADE } from '../formato';
+import { Head, Link, usePage } from '@inertiajs/vue3';
+import {
+    moeda, dataCurta, dataLonga, hora, contagem,
+    CORES_CRITICIDADE, BARRA_CRITICIDADE, ICONE_CRITICIDADE,
+} from '../formato';
 import Icone from '../Components/Icone.vue';
 import Vazio from '../Components/Vazio.vue';
+import { sincronizarAgora } from '../varreduraCliente';
 
 /**
  * Tela 1 — "O que não posso deixar passar?"
@@ -42,7 +46,7 @@ const tudoLimpo = computed(
 );
 
 function sincronizar() {
-    router.post('/publicacoes/sincronizar', {}, { preserveScroll: true });
+    sincronizarAgora();
 }
 </script>
 
@@ -51,8 +55,8 @@ function sincronizar() {
 
     <div class="pagina">
         <header class="px-4 pb-2 pt-6 lg:pb-4 lg:pt-10">
-            <p class="text-sm text-slate-500">{{ saudacao }}, {{ primeiroNome }}</p>
-            <h1 class="text-2xl font-bold text-slate-900 first-letter:uppercase lg:text-3xl">
+            <p class="text-sm text-tinta-3">{{ saudacao }}, {{ primeiroNome }}</p>
+            <h1 class="text-2xl font-bold text-tinta first-letter:uppercase lg:text-3xl">
                 {{ dataLonga(painel.data) }}
             </h1>
         </header>
@@ -65,8 +69,8 @@ function sincronizar() {
                 :href="alerta.url"
                 class="flex gap-3 rounded-2xl p-4 ring-1"
                 :class="alerta.nivel === 'critico'
-                    ? 'bg-red-50 text-red-900 ring-red-200'
-                    : 'bg-amber-50 text-amber-900 ring-amber-200'"
+                    ? 'bg-perigo-fundo text-perigo-tinta ring-perigo-borda'
+                    : 'bg-atencao-fundo text-atencao-tinta ring-atencao-borda'"
             >
                 <Icone nome="alerta" class="mt-0.5 h-5 w-5 shrink-0" />
                 <span class="min-w-0">
@@ -78,10 +82,12 @@ function sincronizar() {
 
         <Vazio
             v-if="tudoLimpo"
+            icone="check"
+            tom="ok"
             titulo="Nada vencendo, nada pendente."
             texto="Sua agenda de hoje está limpa e não há publicação por triar. Continue conferindo o diário do seu tribunal."
         >
-            <button type="button" class="btn-secundario" @click="sincronizar">
+            <button type="button" class="btn-primario" @click="sincronizar">
                 <Icone nome="sincronizar" class="h-4 w-4" />
                 Buscar publicações agora
             </button>
@@ -103,10 +109,10 @@ function sincronizar() {
                 <h2 class="secao-titulo">
                     Prazos até 7 dias
                 </h2>
-                <Link href="/prazos" class="text-sm font-medium text-sky-700">ver todos</Link>
+                <Link href="/prazos" class="text-sm font-medium text-acento">ver todos</Link>
             </div>
 
-            <p v-if="criticos.length" class="mb-2 text-sm font-semibold text-red-700">
+            <p v-if="criticos.length" class="mb-2 text-sm font-semibold text-perigo">
                 {{ criticos.length }} em zona vermelha
             </p>
 
@@ -114,7 +120,7 @@ function sincronizar() {
                 <li v-for="prazo in fatais" :key="prazo.id">
                     <Link
                         :href="`/prazos/${prazo.id}`"
-                        class="flex overflow-hidden rounded-2xl bg-white ring-1"
+                        class="flex overflow-hidden rounded-2xl ring-1"
                         :class="CORES_CRITICIDADE[prazo.criticidade]"
                     >
                         <span class="w-1.5 shrink-0" :class="BARRA_CRITICIDADE[prazo.criticidade]" />
@@ -122,7 +128,13 @@ function sincronizar() {
                         <span class="min-w-0 flex-1 p-3.5">
                             <span class="flex items-start justify-between gap-3">
                                 <span class="min-w-0">
-                                    <span class="block truncate font-semibold">{{ prazo.tipo }}</span>
+                                    <span class="flex items-center gap-1.5">
+                                        <Icone
+                                            :nome="ICONE_CRITICIDADE[prazo.criticidade]"
+                                            class="h-3.5 w-3.5 shrink-0"
+                                        />
+                                        <span class="truncate font-semibold">{{ prazo.tipo }}</span>
+                                    </span>
                                     <span v-if="prazo.processo" class="mt-0.5 block truncate text-sm opacity-80">
                                         {{ prazo.processo.cliente ?? 'sem cliente' }} ·
                                         {{ prazo.processo.rotulo }}
@@ -140,13 +152,13 @@ function sincronizar() {
                             </span>
 
                             <span class="mt-2 flex flex-wrap gap-1.5">
-                                <span class="etiqueta bg-white/70 text-[11px]">
+                                <span class="etiqueta-tinta text-[11px]">
                                     alvo {{ dataCurta(prazo.data_alvo) }}
                                 </span>
-                                <span v-if="prazo.ajustado_manualmente" class="etiqueta bg-white/70 text-[11px]">
+                                <span v-if="prazo.ajustado_manualmente" class="etiqueta-tinta text-[11px]">
                                     ajustado à mão
                                 </span>
-                                <span v-if="prazo.precisa_revisao" class="etiqueta bg-amber-200 text-[11px] text-amber-900">
+                                <span v-if="prazo.precisa_revisao" class="etiqueta bg-atencao/25 text-[11px] text-atencao-tinta">
                                     revisar
                                 </span>
                             </span>
@@ -160,17 +172,17 @@ function sincronizar() {
         <section v-if="painel.agenda.length" class="px-4 pt-6">
             <div class="mb-2 flex items-baseline justify-between">
                 <h2 class="secao-titulo">Hoje na agenda</h2>
-                <Link href="/agenda" class="text-sm font-medium text-sky-700">ver semana</Link>
+                <Link href="/agenda" class="text-sm font-medium text-acento">ver semana</Link>
             </div>
 
-            <ul class="cartao divide-y divide-slate-100">
+            <ul class="cartao divide-y divide-borda-sutil">
                 <li v-for="evento in painel.agenda" :key="evento.id" class="flex gap-3 p-3.5">
-                    <span class="w-14 shrink-0 font-mono text-sm font-semibold text-slate-700">
+                    <span class="w-14 shrink-0 font-mono text-sm font-semibold text-tinta-2">
                         {{ evento.dia_inteiro ? '—' : hora(evento.inicio) }}
                     </span>
                     <span class="min-w-0 flex-1">
-                        <span class="block truncate font-medium text-slate-900">{{ evento.titulo }}</span>
-                        <span v-if="evento.local || evento.processo" class="block truncate text-sm text-slate-500">
+                        <span class="block truncate font-medium text-tinta">{{ evento.titulo }}</span>
+                        <span v-if="evento.local || evento.processo" class="block truncate text-sm text-tinta-3">
                             {{ [evento.local, evento.processo].filter(Boolean).join(' · ') }}
                         </span>
                         <a
@@ -178,7 +190,7 @@ function sincronizar() {
                             :href="evento.link"
                             target="_blank"
                             rel="noopener"
-                            class="mt-1 inline-block text-sm font-medium text-sky-700"
+                            class="mt-1 inline-block text-sm font-medium text-acento"
                         >
                             entrar na videoconferência
                         </a>
@@ -196,33 +208,33 @@ function sincronizar() {
                 <h2 class="secao-titulo">
                     Publicações por triar
                 </h2>
-                <button type="button" class="text-sm font-medium text-sky-700" @click="sincronizar">
+                <button type="button" class="text-sm font-medium text-acento" @click="sincronizar">
                     sincronizar
                 </button>
             </div>
 
             <Link href="/publicacoes" class="block cartao overflow-hidden">
-                <span class="flex items-center gap-3 border-b border-slate-100 bg-sky-50 px-4 py-3">
-                    <span class="flex h-9 w-9 items-center justify-center rounded-full bg-sky-600 text-sm font-bold text-white">
+                <span class="flex items-center gap-3 border-b border-borda-sutil bg-acento-fundo px-4 py-3">
+                    <span class="flex h-9 w-9 items-center justify-center rounded-full bg-acento-solido text-sm font-bold text-white">
                         {{ painel.publicacoes_novas.total }}
                     </span>
-                    <span class="text-sm font-semibold text-sky-900">
+                    <span class="text-sm font-semibold text-acento-tinta">
                         {{ painel.publicacoes_novas.total === 1 ? 'publicação aguardando' : 'publicações aguardando' }}
                     </span>
-                    <Icone nome="seta" class="ml-auto h-5 w-5 text-sky-700" />
+                    <Icone nome="seta" class="ml-auto h-5 w-5 text-acento" />
                 </span>
 
-                <ul class="divide-y divide-slate-100">
+                <ul class="divide-y divide-borda-sutil">
                     <li v-for="pub in painel.publicacoes_novas.itens" :key="pub.id" class="px-4 py-3">
                         <span class="flex items-baseline justify-between gap-2">
-                            <span class="truncate text-sm font-medium text-slate-800">
+                            <span class="truncate text-sm font-medium text-tinta">
                                 {{ pub.tribunal ?? 'DJEN' }}
                             </span>
-                            <span class="shrink-0 font-mono text-xs text-slate-500">
+                            <span class="shrink-0 font-mono text-xs text-tinta-3">
                                 {{ dataCurta(pub.data_disponibilizacao) }}
                             </span>
                         </span>
-                        <span class="mt-0.5 line-clamp-2 block text-sm leading-snug text-slate-500">
+                        <span class="mt-0.5 line-clamp-2 block text-sm leading-snug text-tinta-3">
                             {{ pub.resumo }}
                         </span>
                     </li>
@@ -234,43 +246,43 @@ function sincronizar() {
         <section v-if="painel.financeiro.vencido_qtd > 0 || painel.financeiro.a_receber_mes > 0" class="px-4 pb-2 pt-6">
             <div class="mb-2 flex items-baseline justify-between">
                 <h2 class="secao-titulo">Dinheiro</h2>
-                <Link href="/financeiro" class="text-sm font-medium text-sky-700">ver painel</Link>
+                <Link href="/financeiro" class="text-sm font-medium text-acento">ver painel</Link>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
-                <div class="cartao p-3.5" :class="painel.financeiro.vencido_qtd ? 'ring-1 ring-red-200' : ''">
-                    <p class="text-xs font-medium text-slate-500">Vencido</p>
+                <div class="cartao p-3.5" :class="painel.financeiro.vencido_qtd ? 'ring-1 ring-perigo-borda' : ''">
+                    <p class="text-xs font-medium text-tinta-3">Vencido</p>
                     <p
                         class="mt-1 text-lg font-bold"
-                        :class="painel.financeiro.vencido_qtd ? 'text-red-700' : 'text-slate-900'"
+                        :class="painel.financeiro.vencido_qtd ? 'text-perigo' : 'text-tinta'"
                     >
                         {{ moeda(painel.financeiro.vencido_total) }}
                     </p>
-                    <p class="text-xs text-slate-500">
+                    <p class="text-xs text-tinta-3">
                         {{ painel.financeiro.vencido_qtd }}
                         {{ painel.financeiro.vencido_qtd === 1 ? 'parcela' : 'parcelas' }}
                     </p>
                 </div>
 
                 <div class="cartao p-3.5">
-                    <p class="text-xs font-medium text-slate-500">A receber no mês</p>
-                    <p class="mt-1 text-lg font-bold text-slate-900">
+                    <p class="text-xs font-medium text-tinta-3">A receber no mês</p>
+                    <p class="mt-1 text-lg font-bold text-tinta">
                         {{ moeda(painel.financeiro.a_receber_mes) }}
                     </p>
                 </div>
             </div>
 
-            <ul v-if="painel.financeiro.itens.length" class="cartao mt-2 divide-y divide-slate-100">
+            <ul v-if="painel.financeiro.itens.length" class="cartao mt-2 divide-y divide-borda-sutil">
                 <li v-for="parcela in painel.financeiro.itens" :key="parcela.id" class="flex items-baseline justify-between gap-3 px-4 py-3">
                     <span class="min-w-0">
-                        <span class="block truncate text-sm font-medium text-slate-800">
+                        <span class="block truncate text-sm font-medium text-tinta">
                             {{ parcela.cliente ?? 'Sem cliente' }}
                         </span>
-                        <span class="block font-mono text-xs text-red-600">
+                        <span class="block font-mono text-xs text-perigo">
                             venceu {{ dataCurta(parcela.vencimento) }}
                         </span>
                     </span>
-                    <span class="shrink-0 font-semibold text-slate-900">{{ moeda(parcela.valor) }}</span>
+                    <span class="shrink-0 font-semibold text-tinta">{{ moeda(parcela.valor) }}</span>
                 </li>
             </ul>
         </section>
@@ -278,7 +290,7 @@ function sincronizar() {
         </div>
         </div>
 
-        <p class="px-6 pb-6 pt-2 text-center text-xs leading-relaxed text-slate-400 lg:pt-6">
+        <p class="px-6 pb-6 pt-2 text-center text-xs leading-relaxed text-tinta-3 lg:pt-6">
             O Mithrandir não substitui a conferência do diário oficial.
             A responsabilidade pelo prazo continua sendo do advogado.
         </p>
