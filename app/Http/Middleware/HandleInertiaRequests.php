@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Models\Membro;
 use App\Models\Notificacao;
+use App\Models\OabWatch;
 use App\Models\Prazo;
 use App\Models\Publicacao;
 use App\Models\User;
@@ -52,6 +53,35 @@ class HandleInertiaRequests extends Middleware
     }
 
     /**
+     * Saude do radar, para o shell mostrar defasagem em qualquer tela.
+     *
+     * Isto existe porque a varredura pode depender do navegador (o DJEN
+     * recusa IP estrangeiro). Quando a busca so acontece se alguem abrir o
+     * app, a pessoa PRECISA ver ha quanto tempo ninguem abriu - senao a tela
+     * vazia passa por "nao ha publicacao nova" quando na verdade e "ninguem
+     * foi olhar". Para contagem de prazo, essa diferenca e tudo.
+     *
+     * @return array<string, mixed>
+     */
+    private function radar(): array
+    {
+        $watches = OabWatch::doAdvogado(contexto()->advogadoId())
+            ->where('ativo', true)
+            ->get(['ultima_sync_em', 'falhas_consecutivas']);
+
+        $ultima = $watches->max('ultima_sync_em');
+
+        return [
+            'tem_termos' => $watches->isNotEmpty(),
+            'ultima_varredura_em' => $ultima?->toIso8601String(),
+            // Em horas, e nao em dias, para a varredura diaria das 6h nunca
+            // acender o aviso por causa de um arredondamento de meia-noite.
+            'horas_sem_varredura' => $ultima ? (int) $ultima->diffInHours(now()) : null,
+            'cego' => $watches->contains(fn (OabWatch $w) => $w->falhas_consecutivas >= 2),
+        ];
+    }
+
+    /**
      * Estado global do shell: quem esta logado, os badges da bottom bar e o
      * necessario para o push funcionar. Tudo o que a navegacao precisa saber
      * sem pedir de novo ao servidor.
@@ -88,6 +118,7 @@ class HandleInertiaRequests extends Middleware
                 'notificacoes' => Notificacao::doAdvogado(contexto()->advogadoId())
                     ->whereNull('lida_em')->count(),
             ] : null,
+            'radar' => fn () => $advogado ? $this->radar() : null,
             'push' => [
                 'chave_publica' => app(WebPushService::class)->chavePublica(),
             ],

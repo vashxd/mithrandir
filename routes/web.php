@@ -14,6 +14,7 @@ use App\Http\Controllers\ProcessoController;
 use App\Http\Controllers\PublicacaoController;
 use App\Http\Controllers\PushController;
 use App\Http\Controllers\SyncController;
+use App\Http\Controllers\VarreduraClienteController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -52,6 +53,15 @@ Route::middleware(['auth', 'termo.aceito'])->group(function () {
     Route::post('/publicacoes/sincronizar', [PublicacaoController::class, 'sincronizar'])
         ->middleware('throttle:6,10')
         ->name('publicacoes.sincronizar');
+
+    // Varredura executada pelo navegador: o DJEN recusa IP estrangeiro, e o
+    // cliente esta no Brasil. O plano fica em /varredura/plano, com tres
+    // segmentos, para nao ser capturado por /publicacoes/{publicacao} acima.
+    Route::get('/publicacoes/varredura/plano', [VarreduraClienteController::class, 'plano'])
+        ->name('publicacoes.varredura.plano');
+    Route::post('/publicacoes/varredura', [VarreduraClienteController::class, 'receber'])
+        ->middleware('throttle:60,1')
+        ->name('publicacoes.varredura');
 
     // Prazos (M2).
     Route::get('/prazos', [PrazoController::class, 'index'])->name('prazos');

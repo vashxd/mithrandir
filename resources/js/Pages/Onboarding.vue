@@ -109,8 +109,8 @@ function concluir() {
         <div class="mx-auto w-full max-w-lg">
             <header class="text-center">
                 <img src="/icons/icon.svg" alt="" class="mx-auto h-14 w-14 rounded-2xl">
-                <h1 class="mt-3 text-2xl font-bold text-slate-900">Três passos e você está pronta</h1>
-                <p class="mt-1 text-sm leading-relaxed text-slate-500">
+                <h1 class="mt-3 text-2xl font-bold text-tinta">Três passos e você está pronta</h1>
+                <p class="mt-1 text-sm leading-relaxed text-tinta-3">
                     Sem estes passos o app não avisa nada — e um app de prazo que não avisa não serve.
                 </p>
             </header>
@@ -120,30 +120,32 @@ function concluir() {
                     <div class="flex items-center gap-3 p-4">
                         <span
                             class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold"
-                            :class="passo.pronto ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-600'"
+                            :class="passo.pronto ? 'bg-ok-solido text-white' : 'bg-superficie-3 text-tinta-2'"
                         >
                             <Icone v-if="passo.pronto" nome="check" class="h-4 w-4" />
                             <template v-else>{{ indice + 1 }}</template>
                         </span>
 
                         <span class="min-w-0 flex-1">
-                            <span class="block font-semibold text-slate-900">{{ passo.titulo }}</span>
-                            <span v-if="!passo.obrigatorio && !passo.pronto" class="block text-xs text-slate-500">
+                            <span class="block font-semibold text-tinta">{{ passo.titulo }}</span>
+                            <span v-if="!passo.obrigatorio && !passo.pronto" class="block text-xs text-tinta-3">
                                 opcional no seu aparelho
                             </span>
                         </span>
                     </div>
 
                     <!-- Passo 1: instalação -->
-                    <div v-if="passo.chave === 'instalar' && !instalado" class="border-t border-slate-100 px-4 py-4">
+                    <div v-if="passo.chave === 'instalar' && !instalado" class="border-t border-borda-sutil px-4 py-4">
                         <template v-if="ios">
-                            <p class="rounded-xl bg-red-50 p-3 text-sm leading-relaxed text-red-900 ring-1 ring-red-200">
-                                <strong>No iPhone este passo é obrigatório.</strong>
+                            <p class="rounded-xl bg-perigo-fundo p-3 text-sm leading-relaxed text-perigo-tinta ring-1 ring-perigo-borda">
+                                <strong>No iPhone, sem instalar não há push.</strong>
                                 O Safari só entrega notificação para app instalado na tela de início.
-                                Sem isso, você não recebe alerta de prazo nenhum.
+                                O alerta de prazo ainda chega, mas por e-mail e só depois de três
+                                tentativas de push falharem — é o caminho lento, fácil de perder
+                                na caixa de entrada.
                             </p>
 
-                            <ol class="mt-3 space-y-2 text-sm text-slate-700">
+                            <ol class="mt-3 space-y-2 text-sm text-tinta-2">
                                 <li>1. Toque no botão <strong>Compartilhar</strong> (o quadrado com a seta para cima).</li>
                                 <li>2. Role e escolha <strong>Adicionar à Tela de Início</strong>.</li>
                                 <li>3. Confirme e abra o Mithrandir pelo ícone novo.</li>
@@ -151,7 +153,7 @@ function concluir() {
                         </template>
 
                         <template v-else>
-                            <p class="text-sm leading-relaxed text-slate-600">
+                            <p class="text-sm leading-relaxed text-tinta-2">
                                 No Android, use o menu do navegador e escolha
                                 <strong>Instalar app</strong> ou <strong>Adicionar à tela inicial</strong>.
                                 As notificações funcionam mesmo sem instalar, mas o app fica mais rápido e
@@ -161,13 +163,13 @@ function concluir() {
                     </div>
 
                     <!-- Passo 2: notificações -->
-                    <div v-if="passo.chave === 'notificar'" class="border-t border-slate-100 px-4 py-4">
-                        <p v-if="!push_configurado" class="rounded-xl bg-amber-50 p-3 text-sm text-amber-900 ring-1 ring-amber-200">
+                    <div v-if="passo.chave === 'notificar'" class="border-t border-borda-sutil px-4 py-4">
+                        <p v-if="!push_configurado" class="rounded-xl bg-atencao-fundo p-3 text-sm text-atencao-tinta ring-1 ring-atencao-borda">
                             As chaves VAPID ainda não foram configuradas no servidor.
                             Rode <code class="font-mono">php artisan mithrandir:vapid</code> e reinicie a aplicação.
                         </p>
 
-                        <p v-else-if="!podePush" class="rounded-xl bg-amber-50 p-3 text-sm text-amber-900 ring-1 ring-amber-200">
+                        <p v-else-if="!podePush" class="rounded-xl bg-atencao-fundo p-3 text-sm text-atencao-tinta ring-1 ring-atencao-borda">
                             Instale o app na tela de início primeiro — só depois o iPhone libera as notificações.
                         </p>
 
@@ -196,13 +198,13 @@ function concluir() {
                                 v-if="statusPush"
                                 class="rounded-xl px-3 py-2.5 text-sm"
                                 :class="statusPush.ok
-                                    ? 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200'
-                                    : 'bg-red-50 text-red-800 ring-1 ring-red-200'"
+                                    ? 'bg-ok-fundo text-ok-tinta ring-1 ring-ok-borda'
+                                    : 'bg-perigo-fundo text-perigo-tinta ring-1 ring-perigo-borda'"
                             >
                                 {{ statusPush.texto }}
                             </p>
 
-                            <p class="text-xs leading-relaxed text-slate-500">
+                            <p class="text-xs leading-relaxed text-tinta-3">
                                 Você recebe alerta de nova publicação e de prazo em D-10, D-5, D-3, D-1
                                 e na manhã do dia fatal.
                             </p>
@@ -210,8 +212,8 @@ function concluir() {
                     </div>
 
                     <!-- Passo 3: radar -->
-                    <div v-if="passo.chave === 'radar'" class="border-t border-slate-100 px-4 py-4">
-                        <p class="text-sm leading-relaxed text-slate-600">
+                    <div v-if="passo.chave === 'radar'" class="border-t border-borda-sutil px-4 py-4">
+                        <p class="text-sm leading-relaxed text-tinta-2">
                             Tribunais gravam o número da OAB de jeitos diferentes — <code class="font-mono">123456</code>
                             e <code class="font-mono">123456-O</code>, por exemplo. Cadastramos as variações
                             para você; confira se falta alguma.
@@ -221,11 +223,11 @@ function concluir() {
                             <li
                                 v-for="watch in watches"
                                 :key="watch.id"
-                                class="flex items-center justify-between gap-2 rounded-xl bg-slate-50 px-3 py-2.5"
+                                class="flex items-center justify-between gap-2 rounded-xl bg-superficie-2 px-3 py-2.5"
                             >
                                 <span class="min-w-0">
-                                    <span class="block truncate font-mono text-sm text-slate-800">{{ watch.termo }}</span>
-                                    <span class="block text-xs text-slate-500">
+                                    <span class="block truncate font-mono text-sm text-tinta">{{ watch.termo }}</span>
+                                    <span class="block text-xs text-tinta-3">
                                         {{ watch.tipo === 'oab' ? 'OAB' : 'nome' }}
                                         <template v-if="watch.uf"> · {{ watch.uf }}</template>
                                     </span>
@@ -234,7 +236,7 @@ function concluir() {
                                 <button
                                     type="button"
                                     class="shrink-0 rounded-lg px-2.5 py-1.5 text-xs font-semibold"
-                                    :class="watch.ativo ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600'"
+                                    :class="watch.ativo ? 'bg-ok-fundo text-ok-tinta' : 'bg-superficie-3 text-tinta-2'"
                                     @click="alternarTermo(watch)"
                                 >
                                     {{ watch.ativo ? 'ativo' : 'desligado' }}
@@ -267,7 +269,7 @@ function concluir() {
                 {{ tudoPronto ? 'Tudo pronto, ir para o app' : 'Continuar mesmo assim' }}
             </button>
 
-            <p v-if="!tudoPronto" class="mt-2 text-center text-xs leading-relaxed text-slate-500">
+            <p v-if="!tudoPronto" class="mt-2 text-center text-xs leading-relaxed text-tinta-3">
                 Você pode terminar depois em Configurações, mas até lá o app não vai te avisar de nada.
             </p>
         </div>

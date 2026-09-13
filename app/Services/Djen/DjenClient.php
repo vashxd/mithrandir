@@ -30,7 +30,11 @@ class DjenClient
         private readonly int $timeout = 30,
     ) {}
 
-    private function url(): string
+    /**
+     * Base publica da API. O navegador do advogado precisa dela para varrer
+     * o DJEN por conta propria (ver VarreduraClienteController).
+     */
+    public function baseUrl(): string
     {
         return rtrim(
             $this->baseUrl
@@ -144,6 +148,19 @@ class DjenClient
     }
 
     /**
+     * Busca a partir de parametros ja montados - o caminho usado pela
+     * ingestao, que monta a consulta via ConsultaDjen para nunca divergir
+     * da varredura feita pelo navegador.
+     *
+     * @param  array<string, mixed>  $parametros
+     * @return array<int, ComunicacaoDto>
+     */
+    public function buscar(array $parametros): array
+    {
+        return $this->buscarPaginado($parametros);
+    }
+
+    /**
      * @return array{0: CarbonImmutable, 1: CarbonImmutable}
      */
     private function janela(?CarbonImmutable $inicio, ?CarbonImmutable $fim): array
@@ -204,7 +221,7 @@ class DjenClient
                 ->timeout($this->timeout)
                 ->retry(3, 1500, throw: false)
                 ->withUserAgent(config('mithrandir.user_agent'))
-                ->get($this->url().'/api/v1/comunicacao', $parametros);
+                ->get($this->baseUrl().ConsultaDjen::CAMINHO, $parametros);
         } catch (ConnectionException $e) {
             $this->registrarFalha();
 

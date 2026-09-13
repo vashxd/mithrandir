@@ -277,9 +277,9 @@ defineExpose({ abrir });
                 </div>
 
                 <div v-if="paginas.length" class="space-y-2">
-                    <p class="text-sm font-medium text-slate-700">
+                    <p class="text-sm font-medium text-tinta-2">
                         {{ paginas.length }} {{ paginas.length === 1 ? 'página' : 'páginas' }}
-                        <span v-if="paginas.filter((p) => p.largura).length > 1" class="text-slate-500">
+                        <span v-if="paginas.filter((p) => p.largura).length > 1" class="text-tinta-3">
                             — vão virar um PDF único
                         </span>
                     </p>
@@ -290,15 +290,15 @@ defineExpose({ abrir });
                                 v-if="pagina.previa"
                                 :src="pagina.previa"
                                 alt=""
-                                class="aspect-[3/4] w-full rounded-xl object-cover ring-1 ring-slate-200"
+                                class="aspect-[3/4] w-full rounded-xl object-cover ring-1 ring-borda"
                             >
-                            <div v-else class="flex aspect-[3/4] w-full items-center justify-center rounded-xl bg-slate-100 p-2 text-center text-[10px] text-slate-600 ring-1 ring-slate-200">
+                            <div v-else class="flex aspect-[3/4] w-full items-center justify-center rounded-xl bg-superficie-2 p-2 text-center text-[10px] text-tinta-2 ring-1 ring-borda">
                                 {{ pagina.nomeOriginal }}
                             </div>
 
                             <button
                                 type="button"
-                                class="absolute -right-1.5 -top-1.5 flex h-7 w-7 min-h-0 items-center justify-center rounded-full bg-slate-900 text-white"
+                                class="absolute -right-1.5 -top-1.5 flex h-7 w-7 min-h-0 items-center justify-center rounded-full bg-acao text-sobre-acao"
                                 :aria-label="`Remover página ${indice + 1}`"
                                 @click="remover(indice)"
                             >
@@ -320,7 +320,7 @@ defineExpose({ abrir });
                     <input id="nome-doc" v-model="nome" type="text" class="campo" placeholder="CNIS da dona Maria">
                 </div>
 
-                <p v-if="mensagem" class="rounded-xl bg-sky-50 px-4 py-3 text-sm text-sky-900 ring-1 ring-sky-200">
+                <p v-if="mensagem" class="rounded-xl bg-acento-fundo px-4 py-3 text-sm text-acento-tinta ring-1 ring-acento-borda">
                     {{ mensagem }}
                 </p>
             </div>

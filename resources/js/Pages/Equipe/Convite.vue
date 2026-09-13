@@ -27,29 +27,29 @@ const DESCRICAO_PAPEL = {
 <template>
     <Head title="Convite" />
 
-    <div class="flex min-h-screen flex-col justify-center bg-slate-100 px-5 py-10">
+    <div class="flex min-h-screen flex-col justify-center bg-superficie-2 px-5 py-10">
         <div class="mx-auto w-full max-w-sm">
             <div class="mb-6 text-center">
                 <img src="/icons/icon.svg" alt="" class="mx-auto h-14 w-14 rounded-2xl">
-                <h1 class="mt-3 text-2xl font-bold text-slate-900">Convite para equipe</h1>
+                <h1 class="mt-3 text-2xl font-bold text-tinta">Convite para equipe</h1>
             </div>
 
             <div class="cartao space-y-4 p-6">
-                <p class="text-sm leading-relaxed text-slate-700">
+                <p class="text-sm leading-relaxed text-tinta-2">
                     <strong>{{ convite.titular }}</strong>
                     <template v-if="convite.oab"> (OAB {{ convite.oab }})</template>
                     convidou você para trabalhar nos casos dele no Mithrandir.
                 </p>
 
-                <div class="rounded-xl bg-slate-50 p-4">
-                    <p class="text-xs font-medium text-slate-500">Seu papel</p>
-                    <p class="font-semibold capitalize text-slate-900">{{ convite.papel_rotulo }}</p>
-                    <p class="mt-1 text-xs leading-relaxed text-slate-600">
+                <div class="rounded-xl bg-superficie-2 p-4">
+                    <p class="text-xs font-medium text-tinta-3">Seu papel</p>
+                    <p class="font-semibold capitalize text-tinta">{{ convite.papel_rotulo }}</p>
+                    <p class="mt-1 text-xs leading-relaxed text-tinta-2">
                         {{ DESCRICAO_PAPEL[convite.papel] }}
                     </p>
 
-                    <p class="mt-3 text-xs font-medium text-slate-500">Acesso</p>
-                    <p class="text-sm text-slate-800">
+                    <p class="mt-3 text-xs font-medium text-tinta-3">Acesso</p>
+                    <p class="text-sm text-tinta">
                         <template v-if="convite.acesso_total">Todos os casos da carteira</template>
                         <template v-else-if="convite.qtd_processos">
                             {{ convite.qtd_processos }}
@@ -59,16 +59,16 @@ const DESCRICAO_PAPEL = {
                     </p>
                 </div>
 
-                <p v-if="convite.ja_aceito" class="rounded-xl bg-emerald-50 p-3 text-sm text-emerald-800 ring-1 ring-emerald-200">
+                <p v-if="convite.ja_aceito" class="rounded-xl bg-ok-fundo p-3 text-sm text-ok-tinta ring-1 ring-ok-borda">
                     Este convite já foi aceito.
                 </p>
 
-                <p v-if="flash.erro" class="rounded-xl bg-red-50 p-3 text-sm text-red-800 ring-1 ring-red-200">
+                <p v-if="flash.erro" class="rounded-xl bg-perigo-fundo p-3 text-sm text-perigo-tinta ring-1 ring-perigo-borda">
                     {{ flash.erro }}
                 </p>
 
                 <template v-if="!logado_como">
-                    <p class="rounded-xl bg-amber-50 p-3 text-sm leading-relaxed text-amber-900 ring-1 ring-amber-200">
+                    <p class="rounded-xl bg-atencao-fundo p-3 text-sm leading-relaxed text-atencao-tinta ring-1 ring-atencao-borda">
                         Entre com a conta de <strong>{{ convite.email }}</strong> para aceitar.
                         Se ainda não tem conta, crie uma com esse mesmo e-mail.
                     </p>
@@ -77,7 +77,7 @@ const DESCRICAO_PAPEL = {
                 </template>
 
                 <template v-else-if="!emailConfere">
-                    <p class="rounded-xl bg-amber-50 p-3 text-sm leading-relaxed text-amber-900 ring-1 ring-amber-200">
+                    <p class="rounded-xl bg-atencao-fundo p-3 text-sm leading-relaxed text-atencao-tinta ring-1 ring-atencao-borda">
                         Você está conectado como <strong>{{ logado_como }}</strong>, mas o convite foi
                         enviado para <strong>{{ convite.email }}</strong>.
                     </p>
@@ -91,7 +91,7 @@ const DESCRICAO_PAPEL = {
                 </button>
             </div>
 
-            <p class="mt-5 text-center text-xs leading-relaxed text-slate-500">
+            <p class="mt-5 text-center text-xs leading-relaxed text-tinta-3">
                 Você verá dados sigilosos de clientes. O sigilo profissional (EOAB, art. 34)
                 vale para você também, e todo acesso a documento fica registrado.
             </p>

@@ -9,16 +9,16 @@ defineProps({
 });
 
 const CORES = {
-    radar_cego: 'bg-red-100 text-red-800',
-    prazo_d0: 'bg-red-100 text-red-800',
-    prazo_d1: 'bg-red-100 text-red-800',
-    prazo_d3: 'bg-amber-100 text-amber-800',
-    prazo_d5: 'bg-amber-100 text-amber-800',
-    prazo_d10: 'bg-sky-100 text-sky-800',
-    publicacao_nova: 'bg-sky-100 text-sky-800',
-    recalculo_prazos: 'bg-amber-100 text-amber-800',
-    revisao_calendario: 'bg-slate-100 text-slate-700',
-    digest: 'bg-slate-100 text-slate-700',
+    radar_cego: 'bg-perigo-fundo text-perigo-tinta',
+    prazo_d0: 'bg-perigo-fundo text-perigo-tinta',
+    prazo_d1: 'bg-perigo-fundo text-perigo-tinta',
+    prazo_d3: 'bg-atencao-fundo text-atencao-tinta',
+    prazo_d5: 'bg-atencao-fundo text-atencao-tinta',
+    prazo_d10: 'bg-acento-fundo text-acento-tinta',
+    publicacao_nova: 'bg-acento-fundo text-acento-tinta',
+    recalculo_prazos: 'bg-atencao-fundo text-atencao-tinta',
+    revisao_calendario: 'bg-superficie-2 text-tinta-2',
+    digest: 'bg-superficie-2 text-tinta-2',
 };
 </script>
 
@@ -34,7 +34,7 @@ const CORES = {
             texto="Aqui fica o histórico do que o app te avisou: publicação nova, prazo chegando e falha de varredura."
         />
 
-        <ul v-else class="cartao divide-y divide-slate-100">
+        <ul v-else class="cartao divide-y divide-borda-sutil">
             <li v-for="notificacao in notificacoes.data" :key="notificacao.id">
                 <component
                     :is="notificacao.url ? 'a' : 'div'"
@@ -43,20 +43,20 @@ const CORES = {
                     :class="notificacao.lida ? 'opacity-60' : ''"
                 >
                     <span class="flex items-baseline justify-between gap-2">
-                        <span class="etiqueta" :class="CORES[notificacao.tipo] ?? 'bg-slate-100 text-slate-700'">
+                        <span class="etiqueta" :class="CORES[notificacao.tipo] ?? 'bg-superficie-2 text-tinta-2'">
                             {{ notificacao.tipo.replace(/_/g, ' ') }}
                         </span>
-                        <span class="shrink-0 font-mono text-xs text-slate-400">
+                        <span class="shrink-0 font-mono text-xs text-tinta-3">
                             {{ dataHora(notificacao.agendada_para) }}
                         </span>
                     </span>
 
-                    <span class="mt-1.5 block font-medium text-slate-900">{{ notificacao.titulo }}</span>
-                    <span v-if="notificacao.corpo" class="mt-0.5 block text-sm leading-relaxed text-slate-600">
+                    <span class="mt-1.5 block font-medium text-tinta">{{ notificacao.titulo }}</span>
+                    <span v-if="notificacao.corpo" class="mt-0.5 block text-sm leading-relaxed text-tinta-2">
                         {{ notificacao.corpo }}
                     </span>
 
-                    <span class="mt-1 block text-xs text-slate-400">
+                    <span class="mt-1 block text-xs text-tinta-3">
                         <template v-if="notificacao.enviada_em">
                             entregue por {{ notificacao.canal }}
                         </template>
@@ -73,7 +73,7 @@ const CORES = {
                 :href="link.url ?? '#'"
                 class="min-w-11 rounded-lg px-3 py-2 text-center text-sm"
                 :class="[
-                    link.active ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 ring-1 ring-slate-200',
+                    link.active ? 'bg-acao text-sobre-acao' : 'bg-superficie text-tinta-2 ring-1 ring-borda',
                     !link.url ? 'pointer-events-none opacity-40' : '',
                 ]"
                 v-html="link.label"

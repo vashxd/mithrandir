@@ -5,14 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Sem conexao - Mithrandir</title>
     <style>
+        /*
+         * Esta pagina e servida pelo service worker sem o CSS do app, entao os
+         * tokens vivem aqui em copia. Mantenha em sincronia com o bloco
+         * @theme de resources/css/app.css.
+         */
+        :root {
+            color-scheme: light;
+            --fundo: oklch(0.978 0.003 258);
+            --tinta: oklch(0.21 0.03 262);
+            --tinta-3: oklch(0.5 0.025 258);
+            --acao: oklch(0.21 0.03 262);
+            --sobre-acao: oklch(1 0 0);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                color-scheme: dark;
+                --fundo: oklch(0.185 0.012 262);
+                --tinta: oklch(0.965 0.004 258);
+                --tinta-3: oklch(0.7 0.018 258);
+                --acao: oklch(0.92 0.008 258);
+                --sobre-acao: oklch(0.195 0.02 262);
+            }
+        }
+
         body { margin:0; min-height:100vh; display:grid; place-items:center;
                font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-               background:#f1f5f9; color:#0f172a; padding:24px; }
+               background:var(--fundo); color:var(--tinta); padding:24px; }
         .caixa { max-width:420px; text-align:center; }
-        h1 { font-size:1.4rem; margin:0 0 12px; }
-        p { color:#475569; line-height:1.6; margin:0 0 20px; }
+        h1 { font-size:1.4rem; margin:0 0 12px; letter-spacing:-0.015em; }
+        p { color:var(--tinta-3); line-height:1.6; margin:0 0 20px; }
         button { min-height:44px; padding:0 20px; border:0; border-radius:12px;
-                 background:#0f172a; color:#fff; font-weight:600; font-size:1rem; }
+                 background:var(--acao); color:var(--sobre-acao); font-weight:600; font-size:1rem; }
     </style>
 </head>
 <body>

@@ -1,7 +1,10 @@
 <script setup>
 import { ref, watch } from 'vue';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
-import { dataCurta, contagem, CORES_CRITICIDADE, BARRA_CRITICIDADE, ROTULO_STATUS_PRAZO, hoje } from '../../formato';
+import {
+    dataCurta, contagem, hoje, ROTULO_STATUS_PRAZO,
+    CORES_CRITICIDADE, BARRA_CRITICIDADE, ICONE_CRITICIDADE,
+} from '../../formato';
 import Cabecalho from '../../Components/Cabecalho.vue';
 import CadeiaOrigem from '../../Components/CadeiaOrigem.vue';
 import Folha from '../../Components/Folha.vue';
@@ -124,7 +127,7 @@ function enviar() {
         <template #acoes>
             <button
                 type="button"
-                class="flex h-11 w-11 items-center justify-center rounded-full bg-slate-900 text-white"
+                class="flex h-11 w-11 items-center justify-center rounded-full bg-acao text-sobre-acao"
                 aria-label="Novo prazo"
                 @click="abrir"
             >
@@ -140,14 +143,14 @@ function enviar() {
                 :key="filtro.chave"
                 type="button"
                 class="shrink-0 rounded-full px-3.5 py-2 text-sm font-medium"
-                :class="filtros.status === filtro.chave ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 ring-1 ring-slate-200'"
+                :class="filtros.status === filtro.chave ? 'bg-acao text-sobre-acao' : 'bg-superficie text-tinta-2 ring-1 ring-borda'"
                 @click="filtrar(filtro.chave)"
             >
                 {{ filtro.rotulo }}
             </button>
         </div>
 
-        <p v-if="filtros.revisao" class="mx-4 mb-3 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200">
+        <p v-if="filtros.revisao" class="mx-4 mb-3 rounded-xl bg-atencao-fundo px-4 py-3 text-sm text-atencao-tinta ring-1 ring-atencao-borda">
             Mostrando só os prazos que mudaram de data depois de uma alteração no calendário.
         </p>
 
@@ -161,7 +164,7 @@ function enviar() {
             <li v-for="prazo in prazos.data" :key="prazo.id">
                 <Link
                     :href="`/prazos/${prazo.id}`"
-                    class="flex overflow-hidden rounded-2xl bg-white ring-1"
+                    class="flex overflow-hidden rounded-2xl ring-1"
                     :class="CORES_CRITICIDADE[prazo.criticidade]"
                 >
                     <span class="w-1.5 shrink-0" :class="BARRA_CRITICIDADE[prazo.criticidade]" />
@@ -169,7 +172,13 @@ function enviar() {
                     <span class="min-w-0 flex-1 p-3.5">
                         <span class="flex items-start justify-between gap-3">
                             <span class="min-w-0">
-                                <span class="block truncate font-semibold">{{ prazo.tipo }}</span>
+                                <span class="flex items-center gap-1.5">
+                                    <Icone
+                                        :nome="ICONE_CRITICIDADE[prazo.criticidade]"
+                                        class="h-3.5 w-3.5 shrink-0"
+                                    />
+                                    <span class="truncate font-semibold">{{ prazo.tipo }}</span>
+                                </span>
                                 <span v-if="prazo.processo" class="mt-0.5 block truncate text-sm opacity-80">
                                     {{ prazo.processo.cliente ?? 'sem cliente' }} · {{ prazo.processo.rotulo }}
                                 </span>
@@ -185,8 +194,8 @@ function enviar() {
                         </span>
 
                         <span v-if="prazo.ajustado_manualmente || prazo.precisa_revisao" class="mt-2 flex flex-wrap gap-1.5">
-                            <span v-if="prazo.ajustado_manualmente" class="etiqueta bg-white/70 text-[11px]">ajustado à mão</span>
-                            <span v-if="prazo.precisa_revisao" class="etiqueta bg-amber-200 text-[11px] text-amber-900">revisar</span>
+                            <span v-if="prazo.ajustado_manualmente" class="etiqueta-tinta text-[11px]">ajustado à mão</span>
+                            <span v-if="prazo.precisa_revisao" class="etiqueta bg-atencao/25 text-[11px] text-atencao-tinta">revisar</span>
                         </span>
                     </span>
                 </Link>
@@ -204,7 +213,7 @@ function enviar() {
                         {{ processo.rotulo }}
                     </option>
                 </select>
-                <p class="mt-1 text-xs text-slate-500">O caso define quais feriados de tribunal entram na conta.</p>
+                <p class="mt-1 text-xs text-tinta-3">O caso define quais feriados de tribunal entram na conta.</p>
             </div>
 
             <div>
@@ -220,13 +229,13 @@ function enviar() {
             <div>
                 <label class="rotulo" for="rotulo">Nome do prazo</label>
                 <input id="rotulo" v-model="formulario.tipo" type="text" class="campo" placeholder="Contestação">
-                <p v-if="formulario.errors.tipo" class="mt-1 text-sm text-red-600">{{ formulario.errors.tipo }}</p>
+                <p v-if="formulario.errors.tipo" class="mt-1 text-sm text-perigo">{{ formulario.errors.tipo }}</p>
             </div>
 
             <div>
                 <label class="rotulo" for="disponibilizacao">Data de disponibilização no diário</label>
                 <input id="disponibilizacao" v-model="formulario.data_disponibilizacao" type="date" class="campo">
-                <p class="mt-1 text-xs text-slate-500">
+                <p class="mt-1 text-xs text-tinta-3">
                     É a data que sai no DJEN — não a da publicação, nem a do início da contagem.
                 </p>
             </div>
@@ -245,29 +254,29 @@ function enviar() {
                 </div>
             </div>
 
-            <label class="flex items-start gap-2.5 rounded-2xl bg-white p-4 ring-1 ring-slate-200">
+            <label class="flex items-start gap-2.5 rounded-2xl bg-superficie p-4 ring-1 ring-borda">
                 <input
                     type="checkbox"
-                    class="mt-0.5 h-5 w-5 rounded border-slate-300"
+                    class="mt-0.5 h-5 w-5 rounded border-borda-forte"
                     :checked="formulario.multiplicador === 2"
                     @change="formulario.multiplicador = $event.target.checked ? 2 : 1"
                 >
                 <span>
-                    <span class="block text-sm font-medium text-slate-800">Prazo em dobro</span>
-                    <span class="block text-xs leading-relaxed text-slate-500">
+                    <span class="block text-sm font-medium text-tinta">Prazo em dobro</span>
+                    <span class="block text-xs leading-relaxed text-tinta-3">
                         Fazenda, Defensoria ou MP. Sugerido, nunca automático.
                     </span>
                 </span>
             </label>
 
-            <details class="rounded-2xl bg-white p-4 ring-1 ring-slate-200">
-                <summary class="cursor-pointer text-sm font-medium text-slate-700">Casos especiais</summary>
+            <details class="rounded-2xl bg-superficie p-4 ring-1 ring-borda">
+                <summary class="cursor-pointer text-sm font-medium text-tinta-2">Casos especiais</summary>
 
                 <div class="mt-3 space-y-3">
                     <div>
                         <label class="rotulo" for="inicio-forcado">Início informado manualmente</label>
                         <input id="inicio-forcado" v-model="formulario.data_inicio_forcada" type="date" class="campo">
-                        <p class="mt-1 text-xs text-slate-500">
+                        <p class="mt-1 text-xs text-tinta-3">
                             Para intimação pessoal, carga ou vista dos autos, quando não há disponibilização no diário.
                         </p>
                     </div>
@@ -285,12 +294,12 @@ function enviar() {
             </div>
 
             <!-- Prévia: a cadeia antes de gravar. -->
-            <div v-if="calculando" class="rounded-2xl bg-white p-4 text-center text-sm text-slate-500 ring-1 ring-slate-200">
+            <div v-if="calculando" class="rounded-2xl bg-superficie p-4 text-center text-sm text-tinta-3 ring-1 ring-borda">
                 Calculando…
             </div>
 
             <div v-else-if="previa" class="space-y-2">
-                <div class="rounded-2xl bg-slate-900 p-4 text-center text-white">
+                <div class="rounded-2xl bg-acao p-4 text-center text-sobre-acao">
                     <p class="text-xs font-medium uppercase tracking-wide opacity-70">Data fatal</p>
                     <p class="font-mono text-2xl font-bold">{{ dataCurta(previa.data_fatal) }}</p>
                     <p class="mt-1 text-xs opacity-70">

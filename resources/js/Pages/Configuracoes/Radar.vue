@@ -4,6 +4,7 @@ import { Head, router, useForm } from '@inertiajs/vue3';
 import { dataHora } from '../../formato';
 import Cabecalho from '../../Components/Cabecalho.vue';
 import Icone from '../../Components/Icone.vue';
+import { sincronizarAgora } from '../../varreduraCliente';
 
 /**
  * RF-1.1 e RF-1.9: termos de vigilância e auditoria de cada varredura.
@@ -38,7 +39,7 @@ function remover(watch) {
 }
 
 function sincronizar() {
-    router.post('/publicacoes/sincronizar', {}, { preserveScroll: true });
+    sincronizarAgora();
 }
 </script>
 
@@ -49,7 +50,7 @@ function sincronizar() {
         <template #acoes>
             <button
                 type="button"
-                class="flex h-11 w-11 items-center justify-center rounded-full text-slate-600 active:bg-slate-100"
+                class="flex h-11 w-11 items-center justify-center rounded-full text-tinta-2 active:bg-superficie-2"
                 aria-label="Sincronizar agora"
                 @click="sincronizar"
             >
@@ -59,23 +60,30 @@ function sincronizar() {
     </Cabecalho>
 
     <div class="pagina-estreita space-y-3 px-4 lg:px-8 py-4 pb-8">
-        <p class="rounded-2xl bg-white p-4 text-sm leading-relaxed text-slate-600 ring-1 ring-slate-200">
+        <p class="rounded-2xl bg-superficie p-4 text-sm leading-relaxed text-tinta-2 ring-1 ring-borda">
             A varredura roda todo dia às 6h, sempre pela janela <strong>ontem + hoje</strong> —
             nunca só hoje, para não perder publicação na virada do fuso.
             Tribunais gravam a OAB de formas diferentes, então vale manter as variações ligadas.
+        </p>
+
+        <p class="rounded-2xl bg-atencao-fundo p-4 text-sm leading-relaxed text-atencao-tinta ring-1 ring-atencao-borda">
+            O DJEN recusa requisição de servidor fora do Brasil. Por isso este navegador
+            também varre, sozinho, sempre que você abre o app — o histórico abaixo diz quem
+            buscou cada vez. <strong>Varredura por navegador só acontece se alguém abrir o
+            app</strong>, então o aviso no topo da tela mostra há quanto tempo ninguém abriu.
         </p>
 
         <ul class="space-y-2">
             <li v-for="watch in watches" :key="watch.id" class="cartao overflow-hidden">
                 <div class="flex items-center gap-3 p-4">
                     <span class="min-w-0 flex-1">
-                        <span class="block truncate font-mono font-medium text-slate-900">{{ watch.termo }}</span>
-                        <span class="block text-xs text-slate-500">
+                        <span class="block truncate font-mono font-medium text-tinta">{{ watch.termo }}</span>
+                        <span class="block text-xs text-tinta-3">
                             {{ watch.tipo === 'oab' ? 'OAB' : 'nome' }}
                             <template v-if="watch.uf"> · {{ watch.uf }}</template>
                             · {{ watch.publicacoes }} {{ watch.publicacoes === 1 ? 'publicação' : 'publicações' }}
                         </span>
-                        <span v-if="watch.ultima_sync_em" class="block text-xs text-slate-400">
+                        <span v-if="watch.ultima_sync_em" class="block text-xs text-tinta-3">
                             última busca {{ dataHora(watch.ultima_sync_em) }}
                         </span>
                     </span>
@@ -83,7 +91,7 @@ function sincronizar() {
                     <button
                         type="button"
                         class="shrink-0 rounded-lg px-2.5 py-1.5 text-xs font-semibold"
-                        :class="watch.ativo ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600'"
+                        :class="watch.ativo ? 'bg-ok-fundo text-ok-tinta' : 'bg-superficie-3 text-tinta-2'"
                         @click="alternar(watch)"
                     >
                         {{ watch.ativo ? 'ativo' : 'desligado' }}
@@ -91,7 +99,7 @@ function sincronizar() {
 
                     <button
                         type="button"
-                        class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-slate-400 active:bg-slate-100"
+                        class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-tinta-icone active:bg-superficie-2"
                         :aria-label="`Remover ${watch.termo}`"
                         @click="remover(watch)"
                     >
@@ -99,35 +107,36 @@ function sincronizar() {
                     </button>
                 </div>
 
-                <p v-if="watch.cego" class="border-t border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900">
+                <p v-if="watch.cego" class="border-t border-perigo-borda bg-perigo-fundo px-4 py-3 text-sm text-perigo-tinta">
                     <strong>Radar cego.</strong>
                     {{ watch.falhas_consecutivas }} falhas seguidas. Confira o diário manualmente.
                 </p>
 
-                <div v-if="watch.ultimos_logs.length" class="border-t border-slate-100">
+                <div v-if="watch.ultimos_logs.length" class="border-t border-borda-sutil">
                     <button
                         type="button"
-                        class="w-full px-4 py-2.5 text-left text-xs font-medium text-sky-700"
+                        class="w-full px-4 py-2.5 text-left text-xs font-medium text-acento"
                         @click="logsAbertos[watch.id] = !logsAbertos[watch.id]"
                     >
                         {{ logsAbertos[watch.id] ? 'ocultar' : 'ver' }} histórico de varreduras
                     </button>
 
-                    <ul v-show="logsAbertos[watch.id]" class="divide-y divide-slate-100 px-4 pb-3">
+                    <ul v-show="logsAbertos[watch.id]" class="divide-y divide-borda-sutil px-4 pb-3">
                         <li v-for="(log, indice) in watch.ultimos_logs" :key="indice" class="py-2 text-xs">
                             <span class="flex items-baseline justify-between gap-2">
                                 <span
                                     class="font-semibold"
-                                    :class="log.status === 'sucesso' ? 'text-emerald-700' : 'text-red-700'"
+                                    :class="log.status === 'sucesso' ? 'text-ok' : 'text-perigo'"
                                 >
                                     {{ log.status }}
                                 </span>
-                                <span class="font-mono text-slate-500">{{ dataHora(log.executado_em) }}</span>
+                                <span class="font-mono text-tinta-3">{{ dataHora(log.executado_em) }}</span>
                             </span>
-                            <span v-if="log.status === 'sucesso'" class="block text-slate-500">
+                            <span v-if="log.status === 'sucesso'" class="block text-tinta-3">
                                 {{ log.qtd_itens }} itens · {{ log.qtd_novas }} novas
+                                · {{ log.origem === 'cliente' ? 'por este navegador' : 'pelo servidor' }}
                             </span>
-                            <span v-else class="block text-red-600">{{ log.erro }}</span>
+                            <span v-else class="block text-perigo">{{ log.erro }}</span>
                         </li>
                     </ul>
                 </div>
@@ -140,7 +149,7 @@ function sincronizar() {
             <div>
                 <label class="rotulo" for="termo">Termo</label>
                 <input id="termo" v-model="formulario.termo" type="text" class="campo" placeholder="123456-O">
-                <p v-if="formulario.errors.termo" class="mt-1 text-sm text-red-600">{{ formulario.errors.termo }}</p>
+                <p v-if="formulario.errors.termo" class="mt-1 text-sm text-perigo">{{ formulario.errors.termo }}</p>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
@@ -157,7 +166,7 @@ function sincronizar() {
                 </div>
             </div>
 
-            <p v-if="formulario.tipo === 'nome'" class="rounded-xl bg-amber-50 px-3 py-2.5 text-xs leading-relaxed text-amber-900">
+            <p v-if="formulario.tipo === 'nome'" class="rounded-xl bg-atencao-fundo px-3 py-2.5 text-xs leading-relaxed text-atencao-tinta">
                 Busca por nome traz homônimo e grafia divergente. Toda publicação capturada assim
                 passa pela sua triagem antes de virar prazo.
             </p>

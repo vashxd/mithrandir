@@ -21,8 +21,8 @@ function enviar() {
         <div class="mx-auto w-full max-w-sm">
             <div class="mb-8 text-center">
                 <img src="/icons/icon.svg" alt="" class="mx-auto h-16 w-16 rounded-2xl">
-                <h1 class="mt-4 text-2xl font-bold text-slate-900">Mithrandir</h1>
-                <p class="mt-1 text-sm leading-relaxed text-slate-500">
+                <h1 class="mt-4 text-2xl font-bold text-tinta">Mithrandir</h1>
+                <p class="mt-1 text-sm leading-relaxed text-tinta-3">
                     O que vence, o que tenho que fazer, e quem me deve.
                 </p>
             </div>
@@ -38,7 +38,7 @@ function enviar() {
                         class="campo"
                         required
                     >
-                    <p v-if="formulario.errors.email" class="mt-1 text-sm text-red-600">{{ formulario.errors.email }}</p>
+                    <p v-if="formulario.errors.email" class="mt-1 text-sm text-perigo">{{ formulario.errors.email }}</p>
                 </div>
 
                 <div>
@@ -53,8 +53,8 @@ function enviar() {
                     >
                 </div>
 
-                <label class="flex items-center gap-2.5 text-sm text-slate-700">
-                    <input v-model="formulario.lembrar" type="checkbox" class="h-5 w-5 rounded border-slate-300">
+                <label class="flex items-center gap-2.5 text-sm text-tinta-2">
+                    <input v-model="formulario.lembrar" type="checkbox" class="h-5 w-5 rounded border-borda-forte">
                     Continuar conectada neste aparelho
                 </label>
 
@@ -63,9 +63,9 @@ function enviar() {
                 </button>
             </form>
 
-            <p class="mt-6 text-center text-sm text-slate-600">
+            <p class="mt-6 text-center text-sm text-tinta-2">
                 Ainda não tem conta?
-                <Link href="/cadastrar" class="font-semibold text-sky-700">Criar agora</Link>
+                <Link href="/cadastrar" class="font-semibold text-acento">Criar agora</Link>
             </p>
         </div>
     </div>

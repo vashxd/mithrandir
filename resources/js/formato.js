@@ -74,22 +74,48 @@ export function contagem(dias) {
     return `faltam ${dias} dias`;
 }
 
+/**
+ * A escala de criticidade (RF-3.3).
+ *
+ * Os três estados vivos dividem o mesmo fundo — L .965, C .030 — e se
+ * distinguem pelo matiz. Quem carrega a urgência é a barra e o peso do texto,
+ * não a claridade do cartão: uma rampa em que "atenção" pesa mais que "normal"
+ * ensina o olho ao contrário.
+ *
+ * Vencido rompe a regra de propósito. É o único estado que não pode passar
+ * despercebido, então vira sólido, com texto branco.
+ */
 export const CORES_CRITICIDADE = {
-    vencido: 'bg-red-100 text-red-900 ring-red-300',
-    critico: 'bg-red-50 text-red-800 ring-red-200',
-    atencao: 'bg-amber-50 text-amber-900 ring-amber-200',
-    normal: 'bg-sky-50 text-sky-900 ring-sky-200',
-    concluido: 'bg-slate-100 text-slate-600 ring-slate-200',
-    neutro: 'bg-slate-50 text-slate-700 ring-slate-200',
+    vencido: 'bg-vencido text-white ring-vencido',
+    critico: 'bg-critico-fundo text-critico-tinta ring-critico-borda',
+    atencao: 'bg-atencao-fundo text-atencao-tinta ring-atencao-borda',
+    normal: 'bg-normal-fundo text-normal-tinta ring-normal-borda',
+    concluido: 'bg-superficie-2 text-tinta-2 ring-borda',
+    neutro: 'bg-superficie-2 text-tinta-2 ring-borda',
 };
 
 export const BARRA_CRITICIDADE = {
-    vencido: 'bg-red-600',
-    critico: 'bg-red-500',
-    atencao: 'bg-amber-500',
-    normal: 'bg-sky-500',
-    concluido: 'bg-slate-300',
-    neutro: 'bg-slate-300',
+    /* Sobre o cartão sólido a barra vira um fio claro, não some. */
+    vencido: 'bg-white/30',
+    critico: 'bg-critico',
+    atencao: 'bg-atencao',
+    normal: 'bg-normal',
+    concluido: 'bg-superficie-3',
+    neutro: 'bg-superficie-3',
+};
+
+/**
+ * Segundo canal, além da cor: triângulo cheio, disco, anel, tique. É o que
+ * mantém a escala legível em tons de cinza e para daltonismo vermelho-verde —
+ * cerca de 8% dos homens, num app em que errar o estado custa um prazo.
+ */
+export const ICONE_CRITICIDADE = {
+    vencido: 'triangulo',
+    critico: 'triangulo',
+    atencao: 'disco',
+    normal: 'anel',
+    concluido: 'check',
+    neutro: 'anel',
 };
 
 export const ROTULO_STATUS_PRAZO = {

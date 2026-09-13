@@ -111,10 +111,10 @@ function cancelarExclusao() {
     <div class="pagina-estreita space-y-3 px-4 lg:px-8 py-4 pb-8">
         <div
             v-if="perfil.exclusao_solicitada_em"
-            class="rounded-2xl bg-red-50 p-4 ring-1 ring-red-200"
+            class="rounded-2xl bg-perigo-fundo p-4 ring-1 ring-perigo-borda"
         >
-            <p class="text-sm font-semibold text-red-900">Exclusão de conta agendada</p>
-            <p class="mt-1 text-sm text-red-800">
+            <p class="text-sm font-semibold text-perigo-tinta">Exclusão de conta agendada</p>
+            <p class="mt-1 text-sm text-perigo-tinta">
                 Solicitada em {{ dataHora(perfil.exclusao_solicitada_em) }}.
                 O radar está desligado até lá.
             </p>
@@ -123,21 +123,21 @@ function cancelarExclusao() {
             </button>
         </div>
 
-        <nav class="cartao divide-y divide-slate-100">
+        <nav class="cartao divide-y divide-borda-sutil">
             <Link href="/configuracoes/radar" class="flex items-center justify-between p-4">
                 <span>
-                    <span class="block font-medium text-slate-900">Radar de publicações</span>
-                    <span class="block text-sm text-slate-500">Termos vigiados e histórico de varreduras</span>
+                    <span class="block font-medium text-tinta">Radar de publicações</span>
+                    <span class="block text-sm text-tinta-3">Termos vigiados e histórico de varreduras</span>
                 </span>
-                <Icone nome="seta" class="h-5 w-5 text-slate-400" />
+                <Icone nome="seta" class="h-5 w-5 text-tinta-icone" />
             </Link>
 
             <Link href="/configuracoes/feriados" class="flex items-center justify-between p-4">
                 <span>
-                    <span class="block font-medium text-slate-900">Calendário de feriados</span>
-                    <span class="block text-sm text-slate-500">O que entra na conta dos prazos</span>
+                    <span class="block font-medium text-tinta">Calendário de feriados</span>
+                    <span class="block text-sm text-tinta-3">O que entra na conta dos prazos</span>
                 </span>
-                <Icone nome="seta" class="h-5 w-5 text-slate-400" />
+                <Icone nome="seta" class="h-5 w-5 text-tinta-icone" />
             </Link>
         </nav>
 
@@ -145,13 +145,13 @@ function cancelarExclusao() {
         <section class="cartao p-4">
             <h2 class="secao-titulo">Notificações</h2>
 
-            <p v-if="!push_configurado" class="mt-3 rounded-xl bg-amber-50 p-3 text-sm text-amber-900 ring-1 ring-amber-200">
+            <p v-if="!push_configurado" class="mt-3 rounded-xl bg-atencao-fundo p-3 text-sm text-atencao-tinta ring-1 ring-atencao-borda">
                 As chaves VAPID não estão configuradas no servidor. Rode
                 <code class="font-mono">php artisan mithrandir:vapid --escrever</code>.
             </p>
 
             <template v-else>
-                <p v-if="ios && !instalado" class="mt-3 rounded-xl bg-amber-50 p-3 text-sm leading-relaxed text-amber-900 ring-1 ring-amber-200">
+                <p v-if="ios && !instalado" class="mt-3 rounded-xl bg-atencao-fundo p-3 text-sm leading-relaxed text-atencao-tinta ring-1 ring-atencao-borda">
                     Você está no iPhone sem o app instalado. O Safari só entrega notificação para PWA
                     na tela de início — instale primeiro pelo botão Compartilhar.
                 </p>
@@ -168,24 +168,24 @@ function cancelarExclusao() {
                         v-if="statusPush"
                         class="rounded-xl px-3 py-2.5 text-sm"
                         :class="statusPush.ok
-                            ? 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200'
-                            : 'bg-red-50 text-red-800 ring-1 ring-red-200'"
+                            ? 'bg-ok-fundo text-ok-tinta ring-1 ring-ok-borda'
+                            : 'bg-perigo-fundo text-perigo-tinta ring-1 ring-perigo-borda'"
                     >
                         {{ statusPush.texto }}
                     </p>
                 </div>
             </template>
 
-            <ul v-if="dispositivos.length" class="mt-3 space-y-1 border-t border-slate-100 pt-3">
-                <li v-for="dispositivo in dispositivos" :key="dispositivo.id" class="text-xs text-slate-500">
+            <ul v-if="dispositivos.length" class="mt-3 space-y-1 border-t border-borda-sutil pt-3">
+                <li v-for="dispositivo in dispositivos" :key="dispositivo.id" class="text-xs text-tinta-3">
                     <span class="block truncate">{{ dispositivo.user_agent ?? 'aparelho sem identificação' }}</span>
-                    <span v-if="dispositivo.ultima_entrega_em" class="block text-slate-400">
+                    <span v-if="dispositivo.ultima_entrega_em" class="block text-tinta-3">
                         última entrega {{ dataHora(dispositivo.ultima_entrega_em) }}
                     </span>
                 </li>
             </ul>
 
-            <div class="mt-4 space-y-2 border-t border-slate-100 pt-4">
+            <div class="mt-4 space-y-2 border-t border-borda-sutil pt-4">
                 <label
                     v-for="(rotulo, chave) in {
                         publicacao: 'Nova publicação no DJEN',
@@ -194,9 +194,9 @@ function cancelarExclusao() {
                         financeiro: 'Parcela vencida',
                     }"
                     :key="chave"
-                    class="flex items-center gap-2.5 text-sm text-slate-700"
+                    class="flex items-center gap-2.5 text-sm text-tinta-2"
                 >
-                    <input v-model="formPerfil.preferencias_notificacao[chave]" type="checkbox" class="h-5 w-5 rounded border-slate-300">
+                    <input v-model="formPerfil.preferencias_notificacao[chave]" type="checkbox" class="h-5 w-5 rounded border-borda-forte">
                     {{ rotulo }}
                 </label>
             </div>
@@ -225,7 +225,7 @@ function cancelarExclusao() {
             <div>
                 <label class="rotulo" for="buffer">Folga padrão antes do prazo fatal</label>
                 <input id="buffer" v-model.number="formPerfil.buffer_padrao" type="number" min="0" max="15" class="campo">
-                <p class="mt-1 text-xs leading-relaxed text-slate-500">
+                <p class="mt-1 text-xs leading-relaxed text-tinta-3">
                     Em dias úteis. É essa data — e não a fatal — que aparece na sua agenda.
                 </p>
             </div>
@@ -242,17 +242,20 @@ function cancelarExclusao() {
                         class="campo"
                         :placeholder="`padrão: ${perfil.janela_djen_padrao} dias`"
                     >
-                    <span class="shrink-0 text-sm text-slate-500">dias</span>
+                    <span class="shrink-0 text-sm text-tinta-3">dias</span>
                 </div>
-                <p v-if="formPerfil.errors.janela_djen_dias" class="mt-1 text-sm text-red-600">
+                <p v-if="formPerfil.errors.janela_djen_dias" class="mt-1 text-sm text-perigo">
                     {{ formPerfil.errors.janela_djen_dias }}
                 </p>
-                <p class="mt-1 text-xs leading-relaxed text-slate-500">
+                <p class="mt-1 text-xs leading-relaxed text-tinta-3">
                     Quantos dias para trás cada varredura cobre. Deixe em branco para usar o padrão
                     ({{ perfil.janela_djen_padrao }} dias). Mínimo de 2 — ontem e hoje entram sempre,
                     porque as datas do DJEN são de Brasília e a virada do fuso faria perder
                     publicação. Janela maior é mais segura: se a varredura falhar alguns dias, a
                     próxima cobre o buraco. Reler os mesmos dias não duplica nada.
+                    A <strong>primeira</strong> varredura de um termo novo cobre pelo menos 30 dias,
+                    qualquer que seja o valor aqui — por isso um termo recém-criado chega com
+                    bastante coisa de uma vez.
                 </p>
             </div>
 
@@ -286,21 +289,21 @@ function cancelarExclusao() {
         <!-- DataJud -->
         <section class="cartao p-4">
             <h2 class="secao-titulo">DataJud (CNJ)</h2>
-            <p class="mt-2 text-sm leading-relaxed text-slate-600">
+            <p class="mt-2 text-sm leading-relaxed text-tinta-2">
                 Usado só para enriquecer a capa e as movimentações do caso.
                 <strong>Nunca dispara prazo</strong> — se o DataJud cair, o radar continua funcionando.
             </p>
 
             <p
                 v-if="datajud_alerta_401"
-                class="mt-3 rounded-xl bg-red-50 p-3 text-sm text-red-900 ring-1 ring-red-200"
+                class="mt-3 rounded-xl bg-perigo-fundo p-3 text-sm text-perigo-tinta ring-1 ring-perigo-borda"
             >
                 O CNJ recusou a chave em {{ dataHora(datajud_alerta_401) }}.
                 A chave pública costuma mudar sem aviso — pegue a atual na wiki do CNJ e cole aqui.
             </p>
 
             <p class="mt-3 text-sm">
-                <span class="etiqueta" :class="datajud_configurado ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'">
+                <span class="etiqueta" :class="datajud_configurado ? 'bg-ok-fundo text-ok-tinta' : 'bg-superficie-2 text-tinta-2'">
                     {{ datajud_configurado ? 'chave configurada' : 'sem chave' }}
                 </span>
             </p>
@@ -313,9 +316,11 @@ function cancelarExclusao() {
         <!-- LGPD -->
         <section class="cartao p-4">
             <h2 class="secao-titulo">Seus dados</h2>
-            <p class="mt-2 text-sm leading-relaxed text-slate-600">
+            <p class="mt-2 text-sm leading-relaxed text-tinta-2">
                 Você é o controlador dos dados dos seus clientes; o Mithrandir é operador.
-                A exportação traz tudo em JSON mais um ZIP com os arquivos.
+                A exportação vem num ZIP só: um <span class="font-mono text-xs">dados.json</span>
+                com todos os registros e uma pasta <span class="font-mono text-xs">arquivos/</span>
+                com os documentos anexados.
             </p>
 
             <a href="/configuracoes/exportar" class="btn-secundario mt-3 w-full">
@@ -323,7 +328,7 @@ function cancelarExclusao() {
                 Exportar todos os meus dados
             </a>
 
-            <button type="button" class="btn-secundario mt-2 w-full text-red-600" @click="folhaExclusao = true">
+            <button type="button" class="btn-secundario mt-2 w-full text-perigo" @click="folhaExclusao = true">
                 Excluir minha conta
             </button>
         </section>
@@ -335,7 +340,7 @@ function cancelarExclusao() {
 
     <Folha :aberta="folhaDataJud" titulo="Chave do DataJud" @fechar="folhaDataJud = false">
         <div class="space-y-4">
-            <p class="text-sm leading-relaxed text-slate-600">
+            <p class="text-sm leading-relaxed text-tinta-2">
                 A chave pública é divulgada pelo CNJ em
                 <span class="font-mono text-xs">datajud-wiki.cnj.jus.br/api-publica/acesso</span>.
                 Ela pode ser trocada a qualquer momento, por isso fica editável aqui, sem precisar de deploy.
@@ -344,7 +349,7 @@ function cancelarExclusao() {
             <div>
                 <label class="rotulo" for="chave">Chave</label>
                 <input id="chave" v-model="dataJud.api_key" type="text" class="campo font-mono text-sm">
-                <p v-if="dataJud.errors.api_key" class="mt-1 text-sm text-red-600">{{ dataJud.errors.api_key }}</p>
+                <p v-if="dataJud.errors.api_key" class="mt-1 text-sm text-perigo">{{ dataJud.errors.api_key }}</p>
             </div>
         </div>
 
@@ -357,21 +362,21 @@ function cancelarExclusao() {
 
     <Folha :aberta="folhaExclusao" titulo="Excluir conta" @fechar="folhaExclusao = false">
         <div class="space-y-4">
-            <p class="rounded-2xl bg-red-50 p-4 text-sm leading-relaxed text-red-900 ring-1 ring-red-200">
+            <p class="rounded-2xl bg-perigo-fundo p-4 text-sm leading-relaxed text-perigo-tinta ring-1 ring-perigo-borda">
                 A conta entra em carência de 30 dias. Nesse período o radar fica desligado e
                 <strong>nenhuma publicação nova é capturada</strong> — controle seus prazos por outro
                 meio. Depois dos 30 dias, tudo é apagado em definitivo.
             </p>
 
-            <p class="text-sm text-slate-600">
+            <p class="text-sm text-tinta-2">
                 Antes de seguir, considere
-                <a href="/configuracoes/exportar" class="font-medium text-sky-700">exportar seus dados</a>.
+                <a href="/configuracoes/exportar" class="font-medium text-acento">exportar seus dados</a>.
             </p>
 
             <div>
                 <label class="rotulo" for="confirmacao">Digite EXCLUIR para confirmar</label>
                 <input id="confirmacao" v-model="exclusao.confirmacao" type="text" class="campo" placeholder="EXCLUIR">
-                <p v-if="exclusao.errors.confirmacao" class="mt-1 text-sm text-red-600">{{ exclusao.errors.confirmacao }}</p>
+                <p v-if="exclusao.errors.confirmacao" class="mt-1 text-sm text-perigo">{{ exclusao.errors.confirmacao }}</p>
             </div>
         </div>
 

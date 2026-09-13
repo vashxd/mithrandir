@@ -66,10 +66,10 @@ function rotuloMes(mes) {
 }
 
 const CORES_ABRANGENCIA = {
-    nacional: 'bg-slate-100 text-slate-700',
-    estadual: 'bg-sky-100 text-sky-800',
-    municipal: 'bg-violet-100 text-violet-800',
-    tribunal: 'bg-amber-100 text-amber-800',
+    nacional: 'bg-superficie-2 text-tinta-2',
+    estadual: 'bg-acento-fundo text-acento-tinta',
+    municipal: 'bg-info-fundo text-info-tinta',
+    tribunal: 'bg-atencao-fundo text-atencao-tinta',
 };
 </script>
 
@@ -80,7 +80,7 @@ const CORES_ABRANGENCIA = {
         <template #acoes>
             <button
                 type="button"
-                class="flex h-11 w-11 items-center justify-center rounded-full bg-slate-900 text-white"
+                class="flex h-11 w-11 items-center justify-center rounded-full bg-acao text-sobre-acao"
                 aria-label="Novo feriado"
                 @click="folhaAberta = true"
             >
@@ -91,7 +91,7 @@ const CORES_ABRANGENCIA = {
 
     <div class="pagina-estreita px-4 lg:px-8 py-4 pb-8">
         <!-- Aviso permanente: mitigação do risco "calendário desatualizado". -->
-        <p class="rounded-2xl bg-amber-50 p-4 text-sm leading-relaxed text-amber-900 ring-1 ring-amber-200">
+        <p class="rounded-2xl bg-atencao-fundo p-4 text-sm leading-relaxed text-atencao-tinta ring-1 ring-atencao-borda">
             <Icone nome="alerta" class="mr-1 inline h-4 w-4 align-text-bottom" />
             {{ aviso }}
             Cadastrar um feriado aqui <strong>recalcula automaticamente</strong> os prazos abertos
@@ -101,16 +101,16 @@ const CORES_ABRANGENCIA = {
         <div class="flex items-center justify-between py-3">
             <button
                 type="button"
-                class="flex h-11 w-11 items-center justify-center rounded-full text-slate-600 active:bg-slate-200"
+                class="flex h-11 w-11 items-center justify-center rounded-full text-tinta-2 active:bg-superficie-3"
                 aria-label="Ano anterior"
                 @click="mudarAno(-1)"
             >
                 <Icone nome="voltar" class="h-5 w-5" />
             </button>
-            <p class="font-mono text-lg font-bold text-slate-800">{{ ano }}</p>
+            <p class="font-mono text-lg font-bold text-tinta">{{ ano }}</p>
             <button
                 type="button"
-                class="flex h-11 w-11 items-center justify-center rounded-full text-slate-600 active:bg-slate-200"
+                class="flex h-11 w-11 items-center justify-center rounded-full text-tinta-2 active:bg-superficie-3"
                 aria-label="Próximo ano"
                 @click="mudarAno(1)"
             >
@@ -118,28 +118,28 @@ const CORES_ABRANGENCIA = {
             </button>
         </div>
 
-        <p v-if="!feriados.length" class="cartao p-6 text-center text-sm text-slate-500">
+        <p v-if="!feriados.length" class="cartao p-6 text-center text-sm text-tinta-3">
             Nenhum feriado cadastrado para {{ ano }}. Sem calendário, todo prazo conta como se
             só houvesse fim de semana — o que quase sempre está errado.
         </p>
 
         <div v-else class="space-y-5">
             <section v-for="[mes, itens] in porMes" :key="mes">
-                <h2 class="mb-1.5 text-sm font-bold text-slate-700 first-letter:uppercase">{{ rotuloMes(mes) }}</h2>
+                <h2 class="mb-1.5 text-sm font-bold text-tinta-2 first-letter:uppercase">{{ rotuloMes(mes) }}</h2>
 
-                <ul class="cartao divide-y divide-slate-100">
+                <ul class="cartao divide-y divide-borda-sutil">
                     <li v-for="feriado in itens" :key="feriado.id" class="flex items-center gap-3 p-3.5">
                         <span class="w-12 shrink-0 text-center">
-                            <span class="block font-mono text-sm font-bold text-slate-800">
+                            <span class="block font-mono text-sm font-bold text-tinta">
                                 {{ feriado.data.slice(8, 10) }}
                             </span>
-                            <span class="block text-[10px] text-slate-400 first-letter:uppercase">
+                            <span class="block text-[10px] text-tinta-3 first-letter:uppercase">
                                 {{ diaDaSemana(feriado.data).slice(0, 3) }}
                             </span>
                         </span>
 
                         <span class="min-w-0 flex-1">
-                            <span class="block truncate text-sm text-slate-800">{{ feriado.descricao }}</span>
+                            <span class="block truncate text-sm text-tinta">{{ feriado.descricao }}</span>
                             <span class="mt-0.5 flex flex-wrap gap-1">
                                 <span class="etiqueta" :class="CORES_ABRANGENCIA[feriado.abrangencia]">
                                     {{ feriado.abrangencia }}
@@ -147,7 +147,7 @@ const CORES_ABRANGENCIA = {
                                     <template v-if="feriado.municipio"> · {{ feriado.municipio }}</template>
                                     <template v-if="feriado.tribunal_sigla"> · {{ feriado.tribunal_sigla }}</template>
                                 </span>
-                                <span v-if="feriado.proprio" class="etiqueta bg-emerald-100 text-emerald-800">seu</span>
+                                <span v-if="feriado.proprio" class="etiqueta bg-ok-fundo text-ok-tinta">seu</span>
                             </span>
                         </span>
                     </li>
@@ -161,13 +161,13 @@ const CORES_ABRANGENCIA = {
             <div>
                 <label class="rotulo" for="data">Data</label>
                 <input id="data" v-model="formulario.data" type="date" class="campo">
-                <p v-if="formulario.errors.data" class="mt-1 text-sm text-red-600">{{ formulario.errors.data }}</p>
+                <p v-if="formulario.errors.data" class="mt-1 text-sm text-perigo">{{ formulario.errors.data }}</p>
             </div>
 
             <div>
                 <label class="rotulo" for="descricao">Descrição</label>
                 <input id="descricao" v-model="formulario.descricao" type="text" class="campo" placeholder="Suspensão de expediente — Portaria 123/2026">
-                <p v-if="formulario.errors.descricao" class="mt-1 text-sm text-red-600">{{ formulario.errors.descricao }}</p>
+                <p v-if="formulario.errors.descricao" class="mt-1 text-sm text-perigo">{{ formulario.errors.descricao }}</p>
             </div>
 
             <div>
@@ -195,11 +195,11 @@ const CORES_ABRANGENCIA = {
                 <input id="municipio" v-model="formulario.municipio" type="text" class="campo" placeholder="Manaus">
             </div>
 
-            <label class="flex items-start gap-2.5 rounded-2xl bg-white p-4 ring-1 ring-slate-200">
-                <input v-model="formulario.suspensao_expediente" type="checkbox" class="mt-0.5 h-5 w-5 rounded border-slate-300">
+            <label class="flex items-start gap-2.5 rounded-2xl bg-superficie p-4 ring-1 ring-borda">
+                <input v-model="formulario.suspensao_expediente" type="checkbox" class="mt-0.5 h-5 w-5 rounded border-borda-forte">
                 <span>
-                    <span class="block text-sm font-medium text-slate-800">É suspensão de expediente forense</span>
-                    <span class="block text-xs leading-relaxed text-slate-500">
+                    <span class="block text-sm font-medium text-tinta">É suspensão de expediente forense</span>
+                    <span class="block text-xs leading-relaxed text-tinta-3">
                         Marque quando vier de portaria do tribunal, e não de feriado civil.
                     </span>
                 </span>

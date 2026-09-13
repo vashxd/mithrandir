@@ -36,65 +36,65 @@ const DESTAQUE = ['data_fatal', 'data_alvo'];
 </script>
 
 <template>
-    <div v-if="cadeia" class="rounded-2xl border border-slate-200 bg-white">
+    <div v-if="cadeia" class="rounded-2xl border border-borda bg-superficie">
         <button
             v-if="!sempreAberta"
             type="button"
             class="flex w-full items-center justify-between px-4 py-3 text-left"
             @click="aberta = !aberta"
         >
-            <span class="text-sm font-semibold text-slate-800">Como esta data foi calculada</span>
-            <span class="text-xs font-medium text-sky-700">{{ aberta ? 'ocultar' : 'ver cadeia' }}</span>
+            <span class="text-sm font-semibold text-tinta">Como esta data foi calculada</span>
+            <span class="text-xs font-medium text-acento">{{ aberta ? 'ocultar' : 'ver cadeia' }}</span>
         </button>
 
         <div v-show="aberta" class="px-4 pb-4" :class="sempreAberta ? 'pt-4' : ''">
-            <ol class="relative border-l-2 border-slate-200 pl-5">
+            <ol class="relative border-l-2 border-borda pl-5">
                 <li v-for="(passo, indice) in passos" :key="indice" class="relative pb-4 last:pb-0">
                     <span
                         class="absolute -left-[27px] top-1 flex h-3.5 w-3.5 items-center justify-center rounded-full ring-4 ring-white"
-                        :class="DESTAQUE.includes(passo.etapa) ? 'bg-slate-900' : 'bg-slate-300'"
+                        :class="DESTAQUE.includes(passo.etapa) ? 'bg-acao' : 'bg-superficie-3'"
                     />
 
                     <p class="flex flex-wrap items-baseline gap-x-2">
                         <span
                             class="text-sm font-semibold"
-                            :class="DESTAQUE.includes(passo.etapa) ? 'text-slate-900' : 'text-slate-700'"
+                            :class="DESTAQUE.includes(passo.etapa) ? 'text-tinta' : 'text-tinta-2'"
                         >
                             {{ ROTULOS[passo.etapa] ?? passo.etapa }}
                         </span>
-                        <span class="font-mono text-sm text-slate-900">{{ dataCurta(passo.data) }}</span>
-                        <span class="text-xs text-slate-400">{{ diaDaSemana(passo.data) }}</span>
+                        <span class="font-mono text-sm text-tinta">{{ dataCurta(passo.data) }}</span>
+                        <span class="text-xs text-tinta-3">{{ diaDaSemana(passo.data) }}</span>
                     </p>
 
-                    <p class="mt-0.5 text-xs leading-relaxed text-slate-500">{{ passo.regra }}</p>
+                    <p class="mt-0.5 text-xs leading-relaxed text-tinta-3">{{ passo.regra }}</p>
 
-                    <p v-if="passo.base_legal" class="mt-1 inline-block rounded bg-slate-100 px-1.5 py-0.5 text-[11px] font-medium text-slate-600">
+                    <p v-if="passo.base_legal" class="mt-1 inline-block rounded bg-superficie-2 px-1.5 py-0.5 text-[11px] font-medium text-tinta-2">
                         {{ passo.base_legal }}
                     </p>
                 </li>
             </ol>
 
-            <div v-if="naoContados.length" class="mt-4 rounded-xl bg-slate-50 p-3">
-                <p class="text-xs font-semibold text-slate-700">Dias em que o prazo não correu</p>
+            <div v-if="naoContados.length" class="mt-4 rounded-xl bg-superficie-2 p-3">
+                <p class="text-xs font-semibold text-tinta-2">Dias em que o prazo não correu</p>
                 <ul class="mt-1.5 space-y-1">
-                    <li v-for="dia in naoContados" :key="dia.data" class="flex gap-2 text-xs text-slate-600">
+                    <li v-for="dia in naoContados" :key="dia.data" class="flex gap-2 text-xs text-tinta-2">
                         <span class="font-mono">{{ dataCurta(dia.data) }}</span>
-                        <span class="text-slate-400">·</span>
+                        <span class="text-tinta-3">·</span>
                         <span>{{ dia.motivo }}</span>
                     </li>
                 </ul>
             </div>
 
-            <div v-if="ajuste" class="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3">
-                <p class="text-xs font-semibold text-amber-900">Ajustado manualmente</p>
-                <p class="mt-1 text-xs text-amber-900">
+            <div v-if="ajuste" class="mt-4 rounded-xl border border-atencao-borda bg-atencao-fundo p-3">
+                <p class="text-xs font-semibold text-atencao-tinta">Ajustado manualmente</p>
+                <p class="mt-1 text-xs text-atencao-tinta">
                     De <span class="font-mono">{{ dataCurta(ajuste.de) }}</span>
                     para <span class="font-mono font-semibold">{{ dataCurta(ajuste.para) }}</span>
                 </p>
-                <p class="mt-1 text-xs leading-relaxed text-amber-800">“{{ ajuste.justificativa }}”</p>
+                <p class="mt-1 text-xs leading-relaxed text-atencao-tinta">“{{ ajuste.justificativa }}”</p>
             </div>
 
-            <p class="mt-4 border-t border-slate-100 pt-3 text-xs leading-relaxed text-slate-500">
+            <p class="mt-4 border-t border-borda-sutil pt-3 text-xs leading-relaxed text-tinta-3">
                 O Mithrandir não substitui a conferência no diário oficial. A contagem depende do
                 calendário de feriados cadastrado, que pode estar incompleto.
             </p>
