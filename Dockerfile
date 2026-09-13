@@ -68,12 +68,7 @@ RUN composer dump-autoload --no-dev --optimize --classmap-authoritative --no-scr
 # arquivo temporario ali - sem isto o resultado e
 # "open() ... failed (13: Permission denied)" e um 500 que nunca chega ao PHP.
 # Vale tambem para fastcgi: resposta grande do php-fpm usa o mesmo caminho.
-RUN mkdir -p /var/lib/nginx/tmp/client_body \r
-             /var/lib/nginx/tmp/fastcgi \r
-             /var/lib/nginx/tmp/proxy \r
-             /var/lib/nginx/tmp/uwsgi \r
-             /var/lib/nginx/tmp/scgi \r
-    && chown -R www-data:www-data /var/lib/nginx
+RUN mkdir -p /var/lib/nginx/tmp/client_body /var/lib/nginx/tmp/fastcgi /var/lib/nginx/tmp/proxy /var/lib/nginx/tmp/uwsgi /var/lib/nginx/tmp/scgi && chown -R www-data:www-data /var/lib/nginx
 
 ENV PORT=10000
 EXPOSE 10000
